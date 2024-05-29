@@ -1,35 +1,36 @@
-"use client";
+"use client"
 /**
  * This config is used to set up Sanity Studio that's mounted on the `app/(sanity)/studio/[[...tool]]/page.tsx` route
  */
-import { visionTool } from "@sanity/vision";
-import { PluginOptions, defineConfig } from "sanity";
-import { unsplashImageAsset } from "sanity-plugin-asset-source-unsplash";
+import { visionTool } from "@sanity/vision"
+import { PluginOptions, defineConfig } from "sanity"
+import { unsplashImageAsset } from "sanity-plugin-asset-source-unsplash"
 import {
   presentationTool,
   defineDocuments,
   defineLocations,
   type DocumentLocation,
-} from "sanity/presentation";
-import { structureTool } from "sanity/structure";
+} from "sanity/presentation"
+import { structureTool } from "sanity/structure"
 
-import { apiVersion, dataset, projectId, studioUrl } from "@/sanity/lib/api";
-import { pageStructure, singletonPlugin } from "@/sanity/plugins/settings";
-import { assistWithPresets } from "@/sanity/plugins/assist";
-import author from "@/sanity/schemas/documents/author";
-import post from "@/sanity/schemas/documents/post";
-import settings from "@/sanity/schemas/singletons/settings";
-import { resolveHref } from "@/sanity/lib/utils";
+import { apiVersion, dataset, projectId, studioUrl } from "@/sanity/lib/api"
+import { pageStructure, singletonPlugin } from "@/sanity/plugins/settings"
+import { assistWithPresets } from "@/sanity/plugins/assist"
+import author from "@/sanity/schemas/documents/author"
+import post from "@/sanity/schemas/documents/post"
+import settings from "@/sanity/schemas/singletons/settings"
+import { resolveHref } from "@/sanity/lib/utils"
 
 const homeLocation = {
   title: "Home",
   href: "/",
-} satisfies DocumentLocation;
+} satisfies DocumentLocation
 
 export default defineConfig({
   basePath: studioUrl,
   projectId,
   dataset,
+  title: "GoodTalk",
   schema: {
     types: [
       // Singletons
@@ -86,4 +87,4 @@ export default defineConfig({
     process.env.NODE_ENV === "development" &&
       visionTool({ defaultApiVersion: apiVersion }),
   ].filter(Boolean) as PluginOptions[],
-});
+})
