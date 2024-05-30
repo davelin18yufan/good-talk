@@ -12,6 +12,7 @@ import type { HeroQueryResult, SettingsQueryResult } from "@/sanity.types"
 import * as demo from "@/sanity/lib/demo"
 import { sanityFetch } from "@/sanity/lib/fetch"
 import { heroQuery, settingsQuery } from "@/sanity/lib/queries"
+import NotifyButton from "./NotifyButton"
 
 function Intro(props: { title: string | null | undefined; description: any }) {
   const title = props.title || demo.title
@@ -80,7 +81,6 @@ export default async function Page() {
     }),
     sanityFetch<HeroQueryResult>({ query: heroQuery }),
   ])
-  console.log("settings", settings)
 
   return (
     <div className="container mx-auto px-5">
@@ -99,7 +99,8 @@ export default async function Page() {
       )}
       {heroPost?._id && (
         <aside>
-          <h2 className="mb-8 text-6xl font-bold leading-tight tracking-tighter md:text-7xl">
+          <NotifyButton />
+          <h2 className="mb-8 text-5xl font-bold leading-tight tracking-tighter md:text-7xl">
             More Stories
           </h2>
           <Suspense>

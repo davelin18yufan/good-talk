@@ -30,7 +30,6 @@ export default defineConfig({
   basePath: studioUrl,
   projectId,
   dataset,
-  title: "GoodTalk",
   schema: {
     types: [
       // Singletons

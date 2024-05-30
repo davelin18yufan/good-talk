@@ -12,12 +12,11 @@ export default function Avatar({ name, picture }: Props) {
   return (
     <div className="flex items-center text-xl">
       {picture?.asset?._ref ? (
-        <div className="mr-4 h-12 w-12">
+        <div className="mr-4 h-12 w-12 relative">
           <Image
             alt={picture?.alt || ""}
             className="h-full rounded-full object-cover"
-            height={48}
-            width={48}
+            fill
             src={
               urlForImage(picture)
                 ?.height(96)
