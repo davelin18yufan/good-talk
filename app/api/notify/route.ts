@@ -6,7 +6,7 @@ import { Slug } from "@/sanity.types"
 
 interface Webhook {
   _type: string
-  title:string
+  title: string
   content: PortableTextBlock[]
   slug: Slug
 }
@@ -15,22 +15,29 @@ interface Webhook {
 // line-notify
 export async function POST(request: NextRequest) {
   try {
+    const NOTIFY_TOKEN = process.env.NEXT_PUBLIC_LINE_NOTIFY_TOKEN
+    const WEBHOOK_SECRET = process.env.NEXT_PUBLIC_SANITY_WEBHOOK_CREATE_SECRET
+
+    if (!NOTIFY_TOKEN) new Response("Missing notify token")
+    if (!WEBHOOK_SECRET) new Response("Missing webhook secret")
+
     //* Webhook
     // parse body from sanity webhook
     const { body, isValidSignature } = await parseBody<Webhook>(
       request,
-      // process.env.NEXT_PUBLIC_SANITY_HOOK_SECRET
+      process.env.NEXT_PUBLIC_SANITY_WEBHOOK_CREATE_SECRET
     )
 
     if (!isValidSignature) {
       return new Response("Invalid Signature", { status: 401 })
     }
 
-    if (!body?._type) { // every successful sanity request has _type
+    if (!body?._type) {
+      // every successful sanity request has _type
       return new Response("Bad Request", { status: 400 })
     }
 
-    //* Line Notify 
+    //* Line Notify
     const { title, content, slug } = body
     const formData = new FormData()
 
