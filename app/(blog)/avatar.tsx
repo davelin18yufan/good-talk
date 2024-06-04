@@ -10,7 +10,7 @@ interface Props {
 
 export default function Avatar({ name, picture }: Props) {
   return (
-    <div className="flex items-center text-xl">
+    <div className="flex items-center text-lg sm:text-xl">
       {picture?.asset?._ref ? (
         <div className="mr-4 h-12 w-12 relative">
           <Image
@@ -29,7 +29,7 @@ export default function Avatar({ name, picture }: Props) {
       ) : (
         <div className="mr-1">By </div>
       )}
-      <div className="text-pretty text-xl font-bold">{name}</div>
+      <div className="text-pretty text-lg sm:text-xl font-bold">{name}</div>
     </div>
-  );
+  )
 }
