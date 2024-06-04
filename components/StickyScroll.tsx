@@ -112,7 +112,7 @@ export const StickyScroll = ({
           contentClassName
         )}
       >
-        <Link href={`/posts/${content[activeCard].slug}`} className="max-w-[540px] w-full relative rounded-md">
+        <Link href={`/posts/${content[activeCard].slug}`} className="block max-w-[540px] w-full rounded-md">
           {content[activeCard].content ?? null}
         </Link>
         <div className="flex flex-col md:flex-row items-center justify-between mt-6 lg:mt-2 gap-4">
