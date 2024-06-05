@@ -22,16 +22,17 @@ export default async function Footer() {
       <div className="overflow-hidden relative">
         <GridPattern
           squares={[
-            [8, 2],
-            [7, 9],
             [9, 4],
             [10, 9],
             [12, 5],
-            [13, 6],
+            [13, 7],
+            [15, 9],
+            [17, 10],
+            [11, 11],
           ]}
           className={cn(
-            "[mask-image:radial-gradient(200px_circle_at_center,white,transparent)]",
-            "inset-x-20 inset-y-[-30%] h-[200%] skew-y-12"
+            "[mask-image:radial-gradient(350px_circle_at_center,white,transparent)]",
+            "inset-x-20 inset-y-[-40%] h-[200%] skew-y-12"
           )}
         />
         {value.length > 0 ? (

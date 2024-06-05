@@ -105,21 +105,20 @@ export const StickyScroll = ({
           <div className="h-40" />
         </div>
       </div>
-      <div
+      <Link
+        href={`/posts/${content[activeCard].slug}`}
         style={{ background: backgroundGradient }}
         className={cn(
-          "hidden md:block rounded-md bg-white h-60 lg:h-80 sticky top-10 overflow-hidden",
+          "hidden md:flex flex-col rounded-md h-fit bg-white max-w-[540px] sticky top-10 overflow-hidden",
           contentClassName
         )}
       >
-        <Link href={`/posts/${content[activeCard].slug}`} className="block max-w-[540px] w-full rounded-md">
-          {content[activeCard].content ?? null}
-        </Link>
+        {content[activeCard].content ?? null}
         <div className="flex flex-col md:flex-row items-center justify-between mt-6 lg:mt-2 gap-4">
           {content[activeCard].author}
           {content[activeCard].date}
         </div>
-      </div>
+      </Link>
     </motion.div>
   )
 }
