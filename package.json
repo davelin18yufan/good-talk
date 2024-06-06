@@ -13,6 +13,8 @@
     "typegen": "sanity schema extract && sanity typegen generate"
   },
   "dependencies": {
+    "@nivo/line": "^0.87.0",
+    "@radix-ui/react-slot": "^1.0.2",
     "@sanity/assist": "^3.0.4",
     "@sanity/icons": "^2.11.8",
     "@sanity/image-url": "^1.0.2",
@@ -24,20 +26,24 @@
     "@types/react-dom": "^18.3.0",
     "@vercel/speed-insights": "^1.0.10",
     "autoprefixer": "^10.4.19",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.10",
+    "lucide-react": "^0.385.0",
     "next": "latest",
     "next-sanity": "^9.0.18",
     "postcss": "^8.4.38",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.2.1",
     "sanity": "^3.42.1",
     "sanity-plugin-asset-source-unsplash": "^3.0.1",
     "server-only": "^0.0.1",
     "styled-components": "^6.1.11",
     "tailwind-merge": "^2.3.0",
     "tailwindcss": "^3.4.3",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "5.4.5"
   },
   "devDependencies": {

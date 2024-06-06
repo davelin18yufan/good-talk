@@ -8,11 +8,15 @@ const {
 } = require("tailwindcss/lib/util/flattenColorPalette")
 
 export default {
-  content: ["./app/**/*.{ts,tsx}", "./sanity/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  content: [
+    "./app/**/*.{ts,tsx}",
+    "./sanity/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+  ],
   theme: {
     extend: {
-      fontSize:{
-        base: '16px'
+      fontSize: {
+        base: "16px",
       },
       animation: {
         grid: "grid 15s linear infinite",
