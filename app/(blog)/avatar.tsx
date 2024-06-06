@@ -17,6 +17,7 @@ export default function Avatar({ name, picture }: Props) {
             alt={picture?.alt || ""}
             className="h-full rounded-full object-cover"
             fill
+            sizes="48px"
             src={
               urlForImage(picture)
                 ?.height(96)
