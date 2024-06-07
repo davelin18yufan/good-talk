@@ -5,10 +5,12 @@ const icons = [
   {
     icon: BsFillCloudPlusFill,
     iconSize: "h-5 w-5",
+    name: "cloudPlus",
   },
   {
     icon: BsCloudMinus,
     iconSize: "h-5 w-5",
+    name: "cloudMinus",
   },
 ]
 

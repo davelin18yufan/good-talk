@@ -114,11 +114,17 @@ const DockIcon = ({
 
 DockIcon.displayName = "DockIcon"
 
-function useDock(icons: { icon: IconType; iconSize:string }[], dockClasses?:string, magnification?:number) {
+function useDock(
+  icons: { icon: IconType; iconSize: string, name:string }[],
+  dockClasses?: string,
+  magnification?: number
+) {
   return (
     <Dock className={dockClasses} magnification={magnification}>
       {icons.map((icon) => (
-        <DockIcon>{<icon.icon className={icon.iconSize} />}</DockIcon>
+        <DockIcon key={icon.name}>
+          <icon.icon className={icon.iconSize} />
+        </DockIcon>
       ))}
     </Dock>
   )
