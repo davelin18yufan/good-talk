@@ -1,4 +1,5 @@
 import { cn } from "@/utils"
+import SectionTitle from "./SectionTitle"
 
 const TradeLog = ({ className }: { className?: string }) => {
   const trades = [
@@ -62,7 +63,7 @@ const TradeLog = ({ className }: { className?: string }) => {
 
   return (
     <div className={cn("p-4 bg-white rounded-md shadow-md ", className)}>
-      <h2 className="text-xl font-bold mb-2">交易日誌</h2>
+      <SectionTitle title="交易紀錄"/>
       <div className="overflow-y-auto max-h-60">
         {trades.map((trade) => (
           <div key={trade.id} className="p-2 border-b">

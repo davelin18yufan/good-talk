@@ -1,8 +1,9 @@
-import { DocumentTextIcon } from "@sanity/icons";
-import { format, parseISO } from "date-fns";
-import { defineField, defineType } from "sanity";
+import { DocumentTextIcon } from "@sanity/icons"
+import { format, parseISO } from "date-fns"
+import { defineField, defineType } from "sanity"
 
-import authorType from "./author";
+import authorType from "./author"
+import { CSSProperties } from "react"
 
 /**
  * This file is the schema definition for a post.
@@ -15,6 +16,21 @@ import authorType from "./author";
   https://www.sanity.io/docs/schema-types
 
  */
+
+const HighlightIcon = ({
+  styles,
+  icon,
+}: {
+  styles: CSSProperties | undefined
+  icon: React.ReactNode
+}) => <span style={styles}>H</span>
+const HighlightDecorator = ({
+  children,
+  styles,
+}: {
+  children: React.ReactNode
+  styles: CSSProperties | undefined
+}) => <span style={styles}>{children}</span>
 
 export default defineType({
   name: "post",
@@ -44,7 +60,45 @@ export default defineType({
       name: "content",
       title: "Content",
       type: "array",
-      of: [{ type: "block" }],
+      of: [
+        {
+          type: "block",
+          marks: {
+            decorators: [
+              { title: "Strong", value: "strong" },
+              { title: "Emphasis", value: "em" },
+              { title: "Code", value: "code" },
+              { title: "Underline", value: "underline" },
+              { title: "Strike", value: "strike-through" },
+              {
+                title: "Highlight",
+                value: "highlight",
+                icon: (
+                  <HighlightIcon
+                    styles={{ backgroundColor: "yellow" }}
+                    icon="H"
+                  />
+                ),
+                component: ({ children }: { children: React.ReactNode }) => (
+                  <HighlightDecorator styles={{ backgroundColor: "yellow" }}>
+                    {children}
+                  </HighlightDecorator>
+                ),
+              },
+              {
+                title: "BlueText",
+                value: "blueText",
+                icon: <HighlightIcon styles={{ color: "blue" }} icon="T" />,
+                component: ({ children }: { children: React.ReactNode }) => (
+                  <HighlightDecorator styles={{ color: "blue" }}>
+                    {children}
+                  </HighlightDecorator>
+                ),
+              },
+            ],
+          },
+        },
+      ],
     }),
     defineField({
       name: "excerpt",
@@ -70,10 +124,10 @@ export default defineType({
           validation: (rule) => {
             return rule.custom((alt, context) => {
               if ((context.document?.coverImage as any)?.asset?._ref && !alt) {
-                return "Required";
+                return "Required"
               }
-              return true;
-            });
+              return true
+            })
           },
         },
       ],
@@ -103,9 +157,9 @@ export default defineType({
       const subtitles = [
         author && `by ${author}`,
         date && `on ${format(parseISO(date), "LLL d, yyyy")}`,
-      ].filter(Boolean);
+      ].filter(Boolean)
 
-      return { title, media, subtitle: subtitles.join(" ") };
+      return { title, media, subtitle: subtitles.join(" ") }
     },
   },
-});
+})

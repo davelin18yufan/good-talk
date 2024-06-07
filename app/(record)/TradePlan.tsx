@@ -1,4 +1,5 @@
 import React from "react"
+import SectionTitle from "./SectionTitle"
 
 const TradePlan = () => {
   const plans = [
@@ -8,7 +9,7 @@ const TradePlan = () => {
 
   return (
     <div className="p-4 rounded-md shadow-md bg-white">
-      <h2 className="text-xl font-bold mb-2">進出場規劃</h2>
+      <SectionTitle title="進出場規劃"/>
       <div>
         {plans.map((plan) => (
           <div key={plan.id} className="p-2 border-b">
