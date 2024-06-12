@@ -9,9 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { CurrentPrices } from "@/types/fugle.t"
+import { Suspense } from "react"
+import { cn } from "@/utils"
 
-const TradeSummary = async ({
+const TradeSummary = ({
   asset,
+  currentPrices,
+  layout
 }: {
   asset: {
     _id: string
@@ -25,6 +30,8 @@ const TradeSummary = async ({
       current: number
     }[]
   }
+  currentPrices: CurrentPrices
+  layout?:string
 }) => {
   const { totalCost, totalMarketPrice, position } = asset
   const unrealizedProfit = (totalMarketPrice - totalCost).toLocaleString(
@@ -38,7 +45,7 @@ const TradeSummary = async ({
   )
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-md relative">
+    <div className={cn("p-4 bg-white rounded-md shadow-md relative", layout)}>
       <SectionTitle
         title="我的庫存"
         icons={[
@@ -59,26 +66,41 @@ const TradeSummary = async ({
             <TableHead className="">ID</TableHead>
             <TableHead>標的</TableHead>
             <TableHead>成本</TableHead>
+            <TableHead>現價</TableHead>
             <TableHead className="text-right">損益</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {position.map((p) => {
-            const profit = ((p.current - p.cost) * p.quantity).toLocaleString(
-              "en-US",
-              {
+            let profit = ""
+            const marketPrice = currentPrices.find(
+              (price) => price.symbol === p.asset_id
+            )
+            if (marketPrice) {
+              profit = (
+                (marketPrice?.closePrice - p.cost) *
+                p.quantity
+              ).toLocaleString("en-US", {
                 style: "currency",
                 currency: "USD",
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
-              }
-            )
+              })
+            }
+
             return (
               <TableRow className="text-xs text-slate-600" key={p.asset_id}>
                 <TableCell>{p.asset_id}</TableCell>
                 <TableCell>{p.asset_name}</TableCell>
                 <TableCell>{p.cost}</TableCell>
-                <TableCell className="text-right">{profit}</TableCell>
+                <TableCell>{marketPrice?.closePrice}</TableCell>
+                <Suspense
+                  fallback={
+                    <TableCell className="text-right">Calculating..</TableCell>
+                  }
+                >
+                  <TableCell className="text-right">{profit}</TableCell>
+                </Suspense>
               </TableRow>
             )
           })}

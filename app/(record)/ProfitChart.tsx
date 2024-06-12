@@ -1,3 +1,4 @@
+import { cn } from "@/utils"
 import { ResponsiveLine } from "@nivo/line"
 
 function CurvedlineChart(props: any) {
@@ -76,9 +77,9 @@ function CurvedlineChart(props: any) {
   )
 }
 
-export default function ProfitChart(){
+export default function ProfitChart({ layout }: { layout?: string }) {
   return (
-    <div className="p-4 bg-white rounded-md shadow-md">
+    <div className={cn("p-4 bg-white rounded-md shadow-md", layout)}>
       <h2 className="text-lg font-semibold">大盤\損益</h2>
       <CurvedlineChart className="w-full h-[300px]" />
     </div>
