@@ -8,30 +8,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table"
-import { CurrentPrices } from "@/types/fugle.t"
-import { Suspense } from "react"
+import { Asset, CurrentPrices } from "@/types/fugle.t"
 import { cn } from "@/utils"
 
 const TradeSummary = ({
   asset,
   currentPrices,
-  layout
+  layout,
 }: {
-  asset: {
-    _id: string
-    totalCost: number
-    totalMarketPrice: number
-    position: {
-      asset_id: string
-      asset_name: string
-      quantity: number
-      cost: number
-      current: number
-    }[]
-  }
+  asset: Asset
   currentPrices: CurrentPrices
-  layout?:string
+  layout?: string
 }) => {
   const { totalCost, totalMarketPrice, position } = asset
   const unrealizedProfit = (totalMarketPrice - totalCost).toLocaleString(
@@ -48,63 +37,78 @@ const TradeSummary = ({
     <div className={cn("p-4 bg-white rounded-md shadow-md relative", layout)}>
       <SectionTitle
         title="我的庫存"
-        icons={[
-          {
-            icon: RiHomeGearLine,
-            iconSize: "h-5 w-5",
-            name: "gear",
-          },
-        ]}
+        icons={[<RiHomeGearLine className="h-5 w-5" />]}
       />
-      <p className="text-xl text-red-500 mb-4">
-        未實現損益: {unrealizedProfit}
-      </p>
 
+      {/* table tag default display is table and Next will report if thead/tfoot are not inside table */}
+      {/* Wrapping them into Table and separate into 3 parts */}
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="">ID</TableHead>
+        <TableHeader >
+          <TableRow className="*:lg:px-0">
+            <TableHead>ID</TableHead>
             <TableHead>標的</TableHead>
             <TableHead>成本</TableHead>
             <TableHead>現價</TableHead>
             <TableHead className="text-right">損益</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {position.map((p) => {
-            let profit = ""
-            const marketPrice = currentPrices.find(
-              (price) => price.symbol === p.asset_id
-            )
-            if (marketPrice) {
-              profit = (
-                (marketPrice?.closePrice - p.cost) *
-                p.quantity
-              ).toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })
-            }
+      </Table>
 
-            return (
-              <TableRow className="text-xs text-slate-600" key={p.asset_id}>
-                <TableCell>{p.asset_id}</TableCell>
-                <TableCell>{p.asset_name}</TableCell>
-                <TableCell>{p.cost}</TableCell>
-                <TableCell>{marketPrice?.closePrice}</TableCell>
-                <Suspense
-                  fallback={
-                    <TableCell className="text-right">Calculating..</TableCell>
-                  }
+      {/* using wrapper for scrolling and max-height */}
+      <div className="max-h-[30vh] overflow-y-scroll overscroll-contain relative">
+        <Table>
+          <TableBody>
+            {position.map((p) => {
+              let profit = ""
+              const marketPrice = currentPrices.find(
+                (price) => price.symbol === p.asset_id
+              )
+              if (marketPrice) {
+                profit = (
+                  (marketPrice?.closePrice - p.cost) *
+                  p.quantity
+                ).toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }
+
+              return (
+                <TableRow
+                  className="text-xs text-slate-500 *:lg:px-0"
+                  key={p.asset_id}
                 >
-                  <TableCell className="text-right">{profit}</TableCell>
-                </Suspense>
-              </TableRow>
-            )
-          })}
-        </TableBody>
+                  <TableCell>{p.asset_id}</TableCell>
+                  <TableCell>{p.asset_name}</TableCell>
+                  <TableCell>{p.cost}</TableCell>
+                  <TableCell>{marketPrice?.closePrice}</TableCell>
+                  {profit.length ? (
+                    <TableCell className="text-right">{profit}</TableCell>
+                  ) : (
+                    <TableCell className="text-right text-slate-400 animate-pulse">
+                      Calculating..
+                    </TableCell>
+                  )}
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Table>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={4} className="text-lg">
+              未實現損益
+            </TableCell>
+            <TableCell className="text-right text-red-500">
+              {unrealizedProfit}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   )

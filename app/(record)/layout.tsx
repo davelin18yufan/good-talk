@@ -17,7 +17,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <nav className="bg-gray-100 p-4">
+          <div className="container mx-auto">
+            <h1 className="text-2xl font-bold text-center">Dashboard</h1>
+          </div>
+        </nav>
+        {children}
+      </body>
     </html>
   )
 }
