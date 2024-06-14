@@ -68,7 +68,7 @@ export default function ProfitChart({ layout }: { layout: string }) {
         >
           <CartesianGrid stroke="#f5f5f5" />
           <XAxis dataKey="month" />
-          <YAxis label={{ value: "％", position: "insideBottomLeft" }} />
+          <YAxis label={{ value: "％", position: "insideBottom" }} />
           <Tooltip />
           <Legend />
           {/* 大盤 */}

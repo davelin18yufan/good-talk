@@ -6,21 +6,21 @@ export default function SectionTitle({
   dockClasses = "p-0 border-none m-0 h-auto",
   magnification = 50,
   icons = [
-    <BsFillCloudPlusFill className="h-5 w-5" />,
-    <BsCloudMinus className="h-5 w-5" />,
+    {icon:<BsFillCloudPlusFill className="h-5 w-5" />, name:"plus"},
+    {icon:<BsCloudMinus className="h-5 w-5" />, name:"minus"},
   ],
 }: {
   title: string
   dockClasses?: string
   magnification?: number
-  icons?: React.ReactNode[]
+  icons?: {icon:React.ReactNode, name:string}[]
 }) {
   return (
     <div className="flex justify-between items-center mb-2">
       <h2 className="text-xl font-bold">{title}</h2>
       <Dock className={dockClasses} magnification={magnification}>
-        {icons.map((item, i) => (
-          <DockIcon key={i}>{item}</DockIcon>
+        {icons.map((item) => (
+          <DockIcon key={item.name}>{item.icon}</DockIcon>
         ))}
       </Dock>
     </div>

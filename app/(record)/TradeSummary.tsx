@@ -37,13 +37,13 @@ const TradeSummary = ({
     <div className={cn("p-4 bg-white rounded-md shadow-md relative", layout)}>
       <SectionTitle
         title="我的庫存"
-        icons={[<RiHomeGearLine className="h-5 w-5" />]}
+        icons={[{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }]}
       />
 
       {/* table tag default display is table and Next will report if thead/tfoot are not inside table */}
       {/* Wrapping them into Table and separate into 3 parts */}
       <Table>
-        <TableHeader >
+        <TableHeader>
           <TableRow className="*:lg:px-0">
             <TableHead>ID</TableHead>
             <TableHead>標的</TableHead>
