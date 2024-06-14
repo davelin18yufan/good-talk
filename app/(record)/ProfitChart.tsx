@@ -1,89 +1,89 @@
-'use client'
+"use client"
 
+import {
+  ComposedChart,
+  Line,
+  Area,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts"
 import { cn } from "@/utils"
-import { ResponsiveLine } from "@nivo/line"
 
-function CurvedlineChart(props: any) {
-  return (
-    <div {...props}>
-      <ResponsiveLine
-        data={[
-          {
-            id: "Desktop",
-            data: [
-              { x: "Jan", y: 43 },
-              { x: "Feb", y: 137 },
-              { x: "Mar", y: 61 },
-              { x: "Apr", y: 145 },
-              { x: "May", y: 26 },
-              { x: "Jun", y: 154 },
-            ],
-          },
-          {
-            id: "Mobile",
-            data: [
-              { x: "Jan", y: 60 },
-              { x: "Feb", y: 48 },
-              { x: "Mar", y: 177 },
-              { x: "Apr", y: 78 },
-              { x: "May", y: 96 },
-              { x: "Jun", y: 204 },
-            ],
-          },
-        ]}
-        margin={{ top: 10, right: 10, bottom: 40, left: 40 }}
-        xScale={{
-          type: "point",
-        }}
-        yScale={{
-          type: "linear",
-          min: 0,
-          max: "auto",
-        }}
-        curve="monotoneX"
-        axisTop={null}
-        axisRight={null}
-        axisBottom={{
-          tickSize: 0,
-          tickPadding: 16,
-        }}
-        axisLeft={{
-          tickSize: 0,
-          tickValues: 5,
-          tickPadding: 16,
-        }}
-        colors={["#2563eb", "#e11d48"]}
-        pointSize={6}
-        useMesh={true}
-        gridYValues={6}
-        theme={{
-          tooltip: {
-            chip: {
-              borderRadius: "9999px",
-            },
-            container: {
-              fontSize: "12px",
-              textTransform: "capitalize",
-              borderRadius: "6px",
-            },
-          },
-          grid: {
-            line: {
-              stroke: "#f3f4f6",
-            },
-          },
-        }}
-        role="application"
-      />
-    </div>
-  )
-}
+const data = [
+  {
+    month: "Jan",
+    TWSE: 23,
+    Me: 8,
+    相對表現: ((8 / 23) * 100).toFixed(1),
+  },
+  {
+    month: "Feb",
+    TWSE: 27,
+    Me: 10,
+    相對表現: ((10 / 27) * 100).toFixed(1),
+  },
+  {
+    month: "Mar",
+    TWSE: 32,
+    Me: 18,
+    相對表現: ((18 / 32) * 100).toFixed(1),
+  },
+  {
+    month: "Apr",
+    TWSE: 35,
+    Me: 20,
+    相對表現: ((20 / 35) * 100).toFixed(1),
+  },
+  {
+    month: "May",
+    TWSE: 30,
+    Me: 22,
+    相對表現: ((22 / 30) * 100).toFixed(1),
+  },
+  {
+    month: "Jun",
+    TWSE: 28,
+    Me: 24,
+    相對表現: ((24 / 28) * 100).toFixed(1),
+  },
+]
 
-export default function ProfitChart({ layout }: { layout?: string }) {
+export default function ProfitChart({ layout }: { layout: string }) {
   return (
-    <div className={cn("p-4 bg-white rounded-md shadow-md", layout)}>
-      <h2 className="text-lg font-semibold">大盤\損益</h2>
-      <CurvedlineChart className="w-full h-[300px]" />
+    <div className={cn("py-4 bg-white rounded-md shadow-md relative", layout)}>
+      <ResponsiveContainer width="100%" height={360}>
+        <ComposedChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 10,
+            bottom: 20,
+            left: 0,
+          }}
+        >
+          <CartesianGrid stroke="#f5f5f5" />
+          <XAxis dataKey="month" />
+          <YAxis label={{ value: "％", position: "insideBottomLeft" }} />
+          <Tooltip />
+          <Legend />
+          {/* 大盤 */}
+          <Area
+            type="monotone"
+            dataKey="TWSE"
+            fill="#8884d8"
+            stroke="#8884d8"
+          />
+          {/* relative */}
+          <Bar dataKey="相對表現" barSize={20} fill="#413ea0" />
+          {/* Return */}
+          <Line type="natural" dataKey="Me" stroke="#ff7300" />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   )
 }

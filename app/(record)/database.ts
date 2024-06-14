@@ -10,8 +10,6 @@ export interface Asset {
 //     name VARCHAR(100) NOT NULL UNIQUE
 // );
 
-
-
 export interface User {
   _id: number
   username: string
@@ -26,7 +24,6 @@ export interface User {
 //     password VARCHAR(255) NOT NULL,
 //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // );
-
 
 // 持倉
 export interface Position {
@@ -88,7 +85,6 @@ export interface TradePlan {
 //     FOREIGN KEY (asset_id) REFERENCES assets(asset_id)
 // );
 
-
 type TransactionType = "buy" | "sell"
 
 export interface Transaction {
@@ -115,3 +111,11 @@ export interface Transaction {
 //     FOREIGN KEY (asset_id) REFERENCES assets(asset_id)
 // );
 
+export interface Performance {
+  _id: string
+  user_id: string
+  month: string
+  TWSE: number
+  me: number
+  relativePerformance: number
+}
