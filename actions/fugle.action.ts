@@ -3,7 +3,7 @@
 import { CurrentPrices } from "@/types/fugle.t"
 
 const BASE_URL = "https://api.fugle.tw/marketdata/v1.0/stock"
-const API_KEY = process.env.NEXT_PUBLIC_FUGLE_GET_API_KEY
+const API_KEY = process.env.FUGLE_GET_API_KEY
 const headers = {
   "X-API-KEY": API_KEY!,
   caches: "force-cache",

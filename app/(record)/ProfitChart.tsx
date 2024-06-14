@@ -80,7 +80,7 @@ export default function ProfitChart({ layout }: { layout: string }) {
           />
           {/* relative */}
           <Bar dataKey="相對表現" barSize={20} fill="#413ea0" />
-          {/* Return */}
+          {/* performance */}
           <Line type="natural" dataKey="Me" stroke="#ff7300" />
         </ComposedChart>
       </ResponsiveContainer>
