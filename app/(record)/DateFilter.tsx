@@ -1,29 +1,46 @@
 "use client"
 import { cn } from "@/utils"
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef, memo, useCallback } from "react"
+import { useDate } from "@/store/date"
+import { useShallow } from "zustand/react/shallow"
 
-export function DateContainer({
-  layout,
-  children,
-}: {
-  layout: string
-  children: React.ReactNode
-}) {
-  const today = new Date(Date.now()).toISOString().split("T")[0]
-  const [selectedDate, setSelectedDate] = useState<string | null>(today)
-  
-  return (
-    <div className={layout}>
-      <DateFilter today={today} />
-      {children}
-    </div>
-  )
-}
+const DateButton = memo(
+  ({ date, isSelected }: { date: string; isSelected: boolean }) => {
+    const selectDate = useDate((store) => store.selectDate)
+    const handleClick = useCallback(async () => {
+      selectDate(date)
+      //TODO: fetch history data
+    }, [date])
 
-const DateFilter = ({ today }: { today: string }) => {
+    const formatDate = (dateString: string): string => {
+      const date = new Date(dateString)
+      const month = String(date.getMonth() + 1).padStart(2, "0")
+      const day = String(date.getDate()).padStart(2, "0")
+      return `${month}/${day}`
+    }
+    return (
+      <button
+        id={date}
+        className={cn("dateBtn", isSelected && "bg-white text-black")}
+        onClick={handleClick}
+      >
+        {formatDate(date)}
+      </button>
+    )
+  }
+)
+
+const DateFilter = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const containerRef = useRef<HTMLDivElement>(null)
+  // prevent unnecessary rerenders when the selector output does not change according to shallow equal.
+  const { today, selectedDate } = useDate(
+    useShallow((state) => ({
+      today: state.today,
+      selectedDate: state.selectedDate,
+    }))
+  )
 
   const generateDatesForMonth = (month: number, year: number): string[] => {
     let date = new Date(year, month, 1)
@@ -56,13 +73,7 @@ const DateFilter = ({ today }: { today: string }) => {
 
   const dates = generateDatesForMonth(currentMonth, currentYear)
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const day = String(date.getDate()).padStart(2, "0")
-    return `${month}/${day}`
-  }
-
+  // let today scroll into view
   useEffect(() => {
     const todayButton = document.getElementById(today)
     const container = containerRef.current
@@ -95,18 +106,10 @@ const DateFilter = ({ today }: { today: string }) => {
         </button>
       </div>
       <div className="flex space-x-2 overflow-x-auto" ref={containerRef}>
-        {dates.map((date, index) => {
-          const isToday = today === date
+        {dates.map((date) => {
+          const isSelected = selectedDate === date // default = today
 
-          return (
-            <button
-              key={index}
-              id={date}
-              className={cn("dateBtn", isToday && "bg-white text-black")}
-            >
-              {formatDate(date)}
-            </button>
-          )
+          return <DateButton {...{ date, isSelected }} key={date} />
         })}
       </div>
     </div>

@@ -66,7 +66,14 @@
     }
   }
 
-  @layer base {
-    
-    
+  @layer components {
+    .dateBtn {
+      @apply px-4 py-2 rounded-md bg-teal-500 text-white font-bold transition duration-200 hover:bg-white hover:text-black border-2 border-transparent hover:border-teal-500
+    }
+  }
+
+  @layer utilities {
+    .centerAll {
+      @apply flex justify-center items-center
+    }
   }
