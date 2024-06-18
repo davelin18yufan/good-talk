@@ -1,36 +1,40 @@
 "use client"
 import { cn } from "@/utils"
-import React, { useEffect, useState, useRef, memo, useCallback } from "react"
+import { useEffect, useState, useRef, memo, useCallback } from "react"
 import { useDate } from "@/store/date"
 import { useShallow } from "zustand/react/shallow"
 
-const DateButton = memo(
-  ({ date, isSelected }: { date: string; isSelected: boolean }) => {
-    const selectDate = useDate((store) => store.selectDate)
-    const handleClick = useCallback(async () => {
-      selectDate(date)
-      //TODO: fetch history data
-    }, [date])
+const DateButton = memo(function DateButton({
+  date,
+  isSelected,
+}: {
+  date: string
+  isSelected: boolean
+}) {
+  const selectDate = useDate((store) => store.selectDate)
+  const handleClick = useCallback(async () => {
+    selectDate(date)
+    //TODO: fetch history data
+  }, [date, selectDate])
 
-    const formatDate = (dateString: string): string => {
-      const date = new Date(dateString)
-      const month = String(date.getMonth() + 1).padStart(2, "0")
-      const day = String(date.getDate()).padStart(2, "0")
-      return `${month}/${day}`
-    }
-    return (
-      <button
-        id={date}
-        className={cn("dateBtn", isSelected && "bg-white text-black")}
-        onClick={handleClick}
-      >
-        {formatDate(date)}
-      </button>
-    )
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${month}/${day}`
   }
-)
+  return (
+    <button
+      id={date}
+      className={cn("dateBtn", isSelected && "bg-white text-black")}
+      onClick={handleClick}
+    >
+      {formatDate(date)}
+    </button>
+  )
+})
 
-const DateFilter = () => {
+function DateFilter() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const containerRef = useRef<HTMLDivElement>(null)
