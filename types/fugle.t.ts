@@ -28,6 +28,7 @@ export type Plan = {
     name: string
   }
   action: (typeof actions)[number]
+  entryPrice: number
   targetPrice: number // 目標價
   expectation: number // 期望值
   stop: {
