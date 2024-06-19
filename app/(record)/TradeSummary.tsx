@@ -23,6 +23,7 @@ const TradeSummary = ({
   layout?: string
 }) => {
   const { totalCost, totalMarketPrice, position } = asset
+  // TODO: 未實現應該從庫存去計算，水位＝庫存成本/資產
   const unrealizedProfit = (totalMarketPrice - totalCost).toLocaleString(
     "en-US",
     {

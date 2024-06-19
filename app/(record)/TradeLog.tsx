@@ -1,7 +1,8 @@
 import { cn } from "@/utils"
 import SectionTitle from "./SectionTitle"
+import { useDate } from "@/store/date"
 
-const TradeLog = ({ className }: { className?: string }) => {
+const TradeLog = async ({ className }: { className?: string }) => {
   const trades = [
     {
       id: 1,
@@ -60,10 +61,12 @@ const TradeLog = ({ className }: { className?: string }) => {
       quantity: 50,
     },
   ]
-
+  // TODO: fetch log by selectDate
+  // const { selectDate } = useDate((store) => store.selectDate)
+  // const trades = await getTradeLog(selectDate)
   return (
     <div className={cn("p-4 bg-white rounded-md shadow-md ", className)}>
-      <SectionTitle title="交易紀錄"/>
+      <SectionTitle title="交易紀錄" />
       <div className="overflow-y-auto max-h-60">
         {trades.map((trade) => (
           <div key={trade.id} className="p-2 border-b">
