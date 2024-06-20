@@ -3,7 +3,7 @@ import { Tabs } from "@/components/Tabs"
 
 import { cn, formatNumber } from "@/utils"
 import { useDate } from "@/store/date"
-import { Log } from "@/types/fugle.t"
+import { Log as LogType} from "@/types/fugle.t"
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Badge, badgeVariants } from "@/components/ui/badge"
 
-const fakeLogs: Log[] = [
+const fakeLogs: LogType[] = [
   {
     _id: "1",
     type: "多單",
@@ -112,7 +112,7 @@ function TooltipCard({
   )
 }
 
-function Log({ log }: { log: Log }) {
+function Log({ log }: { log: LogType }) {
   return (
     <div
       className={cn(
@@ -142,7 +142,10 @@ function Log({ log }: { log: Log }) {
             badgeVariant="secondary"
           />
           <TooltipCard
-            content={{ trigger: formatNumber(log.quantity), tooltip: "成交數量" }}
+            content={{
+              trigger: formatNumber(log.quantity),
+              tooltip: "成交數量",
+            }}
             badgeVariant="secondary"
           />
           <button
