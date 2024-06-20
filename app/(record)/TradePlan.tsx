@@ -21,7 +21,7 @@ function ExpectationBar({
   const expectation = ((potentialProfit / denominator) * 100).toFixed(1)
   return (
     <div className="centerAll font-bold text-center align-middle text-sm gap-2 p-0.5">
-      <div className="flex items-center w-24 md:w-28 rounded-md">
+      <div className="flex items-center w-24 md:w-28 rounded-md overflow-hidden">
         <div
           className={"bg-rose-400 py-1"}
           style={{ flexGrow: `${potentialProfit / denominator}` }}
@@ -57,8 +57,8 @@ function PlanCard({
   return (
     <ShineBorder
       className={cn("p-4 w-full", {
-        "bg-rose-200": type === "多單",
-        "bg-green-200": type === "空單",
+        "!bg-rose-200": type === "多單",
+        "!bg-green-200": type === "空單",
       })}
       borderWidth={4}
       duration={10}
@@ -68,7 +68,12 @@ function PlanCard({
         <h2 className="lg:text-lg font-bold">
           {target.name} ({target.symbol})
         </h2>
-        <span className="text-sm text-slate-600">
+        <span
+          className={cn("text-sm text-slate-600", {
+            "text-rose-600": type === "多單",
+            "text-green-600": type === "空單",
+          })}
+        >
           {type}
           {action}
         </span>

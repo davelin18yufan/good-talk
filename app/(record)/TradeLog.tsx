@@ -1,82 +1,207 @@
-import { cn } from "@/utils"
 import SectionTitle from "./SectionTitle"
-import { useDate } from "@/store/date"
+import { Tabs } from "@/components/Tabs"
 
-const TradeLog = async ({ className }: { className?: string }) => {
-  const trades = [
+import { cn, formatNumber } from "@/utils"
+import { useDate } from "@/store/date"
+import { Log } from "@/types/fugle.t"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Badge, badgeVariants } from "@/components/ui/badge"
+
+const fakeLogs: Log[] = [
+  {
+    _id: "1",
+    type: "多單",
+    action: "現股買進",
+    target: {
+      symbol: "AAPL",
+      name: "Apple. Inc",
+    },
+    date: "12:09",
+    price: 150.25,
+    quantity: 1000,
+    comment: "在開盤時買入",
+  },
+  {
+    _id: "2",
+    type: "多單",
+    action: "現股賣出",
+    target: {
+      symbol: "AAPL",
+      name: "Apple. Inc",
+    },
+    date: "09:10",
+    price: 155.75,
+    quantity: 100,
+    comment: "在高點賣出",
+  },
+  {
+    _id: "3",
+    type: "多單",
+    action: "融資買進",
+    target: { symbol: "GOOGL", name: "Google. corp" },
+    date: "11:20",
+    price: 2700.5,
+    quantity: 50,
+    comment: "使用保證金進行買進",
+  },
+  {
+    _id: "4",
+    type: "多單",
+    action: "融資賣出",
+    target: { symbol: "GOOGL", name: "Google. corp" },
+    date: "12:32",
+    price: 2725.0,
+    quantity: 50,
+    comment: "持有一天後賣出",
+  },
+  {
+    _id: "5",
+    type: "空單",
+    action: "沖買",
+    target: { symbol: "TSLA", name: "Tsela. Inc" },
+    date: "09:55",
+    price: 900.0,
+    quantity: 20,
+  },
+  {
+    _id: "6",
+    type: "空單",
+    action: "沖賣",
+    target: { symbol: "TSLA", name: "Tsela. Inc" },
+    date: "09:50",
+    price: 910.0,
+    quantity: 20,
+  },
+]
+
+function TooltipCard({
+  content,
+  badgeClassName = "bg-slate-100",
+  badgeVariant = "default",
+  tooltipSide = "bottom",
+  tooltipClassName = "bg-white rounded-lg p-1",
+}: {
+  content: { trigger: string | number; tooltip: string }
+  badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null
+  badgeClassName?: string
+  tooltipSide?: "bottom" | "top" | "right" | "left"
+  tooltipClassName?: string
+}) {
+  return (
+    <TooltipProvider delayDuration={500}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant={badgeVariant} className={badgeClassName}>
+            {content.trigger}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent
+          side={tooltipSide}
+          sideOffset={1}
+          className={tooltipClassName}
+        >
+          <p>{content.tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function Log({ log }: { log: Log }) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border-l-8 shadow-md overflow-hidden flex items-center justify-between",
+        log.type === "多單" ? "border-rose-400" : "border-green-400"
+      )}
+    >
+      <div className="p-2 text-slate-400 text-center">{log.date}</div>
+      <div className="p-2.5 flex-1 text-start">
+        <Badge variant="default">
+          <h3
+            className={cn(
+              "text-lg font-semibold",
+              log.type === "多單" ? "text-rose-600" : "text-green-600"
+            )}
+          >
+            {log.action}
+          </h3>
+        </Badge>
+        <div className="flex items-center mt-2 gap-4 w-full">
+          <TooltipCard
+            content={{ trigger: log.target.name, tooltip: log.target.symbol }}
+            badgeVariant="secondary"
+          />
+          <TooltipCard
+            content={{ trigger: formatNumber(log.price), tooltip: "成交價" }}
+            badgeVariant="secondary"
+          />
+          <TooltipCard
+            content={{ trigger: formatNumber(log.quantity), tooltip: "成交數量" }}
+            badgeVariant="secondary"
+          />
+          <button
+            className={cn(
+              badgeVariants({ variant: "outline" }),
+              "px-2.5 text-md active:bg-slate-100 ml-auto text-slate-800"
+            )}
+          >
+            復盤
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AllLogs() {
+  const tabs = [
     {
-      id: 1,
-      type: "買進",
-      stock: "AAPL",
-      date: "2024-06-01",
-      price: 150,
-      quantity: 100,
+      title: "全部",
+      value: "all",
+      content: fakeLogs.map((log) => <Log key={log._id} log={log} />),
     },
     {
-      id: 2,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
+      title: "多單",
+      value: "多單",
+      content: fakeLogs
+        .filter((log) => log.type === "多單")
+        .map((log) => <Log key={log._id} log={log} />),
     },
     {
-      id: 3,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
-    },
-    {
-      id: 4,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
-    },
-    {
-      id: 5,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
-    },
-    {
-      id: 6,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
-    },
-    {
-      id: 7,
-      type: "賣出",
-      stock: "TSLA",
-      date: "2024-06-03",
-      price: 700,
-      quantity: 50,
+      title: "空單",
+      value: "空單",
+      content: fakeLogs
+        .filter((log) => log.type === "空單")
+        .map((log) => <Log key={log._id} log={log} />),
     },
   ]
+
+  return (
+    <div className="h-80">
+      <Tabs
+        tabs={tabs}
+        // activeTabClassName="bg-gray-200 dark:bg-zinc-800 rounded-full"
+        contentClassName="mt-2"
+        containerClassName="gap-2"
+      />
+    </div>
+  )
+}
+
+const TradeLog = async ({ className }: { className?: string }) => {
   // TODO: fetch log by selectDate
   // const { selectDate } = useDate((store) => store.selectDate)
   // const trades = await getTradeLog(selectDate)
   return (
-    <div className={cn("p-4 bg-white rounded-md shadow-md ", className)}>
+    <div className={cn("p-4 bg-white rounded-md shadow-md", className)}>
       <SectionTitle title="交易紀錄" />
-      <div className="overflow-y-auto max-h-60">
-        {trades.map((trade) => (
-          <div key={trade.id} className="p-2 border-b">
-            <p>
-              {trade.date} - {trade.stock} - {trade.type} - {trade.price} -{" "}
-              {trade.quantity}
-            </p>
-          </div>
-        ))}
-      </div>
+      <AllLogs />
     </div>
   )
 }

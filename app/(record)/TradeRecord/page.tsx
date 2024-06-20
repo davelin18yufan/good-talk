@@ -72,7 +72,7 @@ export default async function TradeRecord() {
         </div>
 
         {/* 交易計劃 */}
-        <TradePlan layout="md:col-span-2 lg:col-span-1 h-[507px]" />
+        <TradePlan layout="md:col-span-2 lg:col-span-1 h-[597px]" />
       </main>
     </div>
   )
