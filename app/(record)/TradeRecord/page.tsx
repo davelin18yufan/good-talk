@@ -2,7 +2,7 @@ import DateFilter from "../DateFilter"
 import TradeLog from "../TradeLog"
 import TradePlan from "../TradePlan"
 import TradeSummary from "../TradeSummary"
-import HistoryTradeSummary from "../HistoryTradeSummary"
+import RealizedPnLChart from "../RealizedPnLChart"
 import ProfitChart from "../ProfitChart"
 
 import { getPositionCurrentPrices } from "@/actions/fugle.action"
@@ -59,10 +59,10 @@ export default async function TradeRecord() {
           layout="col-span-1 md:col-span-2 lg:col-span-1"
         />
 
-        {/* // TODO:暫定是歷史交易明細 */}
-        <HistoryTradeSummary layout="col-span-1" />
+        {/* 已實現的績效紀錄線圖 */}
+        <RealizedPnLChart layout="col-span-1" />
 
-        {/* 大盤跟已實現的線圖 */}
+        {/* 大盤跟已實現比較的線圖 */}
         <ProfitChart layout="col-span-1" />
 
         {/* 日期和進出紀錄 */}
@@ -73,6 +73,8 @@ export default async function TradeRecord() {
 
         {/* 交易計劃 */}
         <TradePlan layout="md:col-span-2 lg:col-span-1 h-[597px]" />
+
+        {/* //TODO: 暫定製作覆盤紀錄及心得紀錄 */}
       </main>
     </div>
   )
