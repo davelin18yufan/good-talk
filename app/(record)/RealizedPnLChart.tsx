@@ -2,6 +2,15 @@
 
 import { cn } from "@/utils"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import {
   Area,
   AreaChart,
   CartesianGrid,
@@ -11,53 +20,181 @@ import {
   YAxis,
   Legend,
 } from "recharts"
+import { useState } from "react"
 
 const data = [
   {
     week: "June/1",
     成交筆數: 118,
     報酬率: 3,
+    獲利筆數: 78,
   },
   {
     week: "June/2",
     成交筆數: 11,
     報酬率: 16.2,
+    獲利筆數: 4,
   },
   {
     week: "June/3",
     成交筆數: 10,
     報酬率: -2,
+    獲利筆數: 1,
   },
   {
     week: "June/4",
     成交筆數: 20,
     報酬率: 0.21,
+    獲利筆數: 10,
   },
 ]
 
 const renderTooltipContent = ({ payload = [] }: any) => {
   if (!payload || !payload.length) return null
-  // 成交筆數 / 獲利率
-  const accuracy = (payload[1].value / payload[0].value).toFixed(2)
+
+  const compareData = (data: any, label1: string, label2: string) => {
+    const comparisonNameMapping: Record<string, string> = {
+      "成交筆數:報酬率": "準確率",
+      "報酬率:成交筆數": "準確率",
+      "成交筆數:獲利筆數": "勝率",
+      "獲利筆數:成交筆數": "勝率",
+      "獲利筆數:報酬率": "平均報酬率",
+      "報酬率:獲利筆數": "平均報酬率",
+    }
+
+    // order of labels might switched after interaction
+    const comparisonKey = `${label1}:${label2}`
+    const reversedComparisonKey = `${label2}:${label1}`
+    const comparisonName =
+      comparisonNameMapping[comparisonKey] ||
+      comparisonNameMapping[reversedComparisonKey] ||
+      "比較結果"
+
+    // calculate result
+    const result = data.map((entry: any) => {
+      const { payload: p } = entry
+      const value1 = p[label1]
+      const value2 = p[label2]
+      let comparison: string
+
+      switch (comparisonName) {
+        case "準確率":
+          // 準確率 = 報酬率 / 成交筆數
+          const accuracy =
+            (label1 === "報酬率" ? value1 / value2 : value2 / value1) * 100
+          comparison = `準確率: ${accuracy.toFixed(2)}%`
+          break
+        case "勝率":
+          // 勝率 = 獲利筆數 / 成交筆數
+          const winRate =
+            (label1 === "獲利筆數" ? value1 / value2 : value2 / value1) * 100
+          comparison = `勝率: ${winRate.toFixed(2)}%`
+          break
+        case "平均報酬率":
+          // 平均報酬率 = 報酬率 / 獲利筆數
+          const avgReturnRate =
+            (label1 === "報酬率" ? value1 / value2 : value2 / value1) * 100
+          comparison = `平均報酬率: ${avgReturnRate.toFixed(2)}%`
+          break
+        default:
+          comparison = `${comparisonName}: ${((value1 / value2) * 100).toFixed(2)}%`
+          break
+      }
+
+      return comparison
+    })
+
+    return result[0]
+  }
 
   return (
     <div className="p-2 bg-white border flex flex-col gap-2">
       <ul className="list">
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} style={{ color: entry.color }}>
-            {`${entry.name}: ${entry.value}${entry.name !== "成交筆數" ? "%" : ""}`}
+            {`${entry.name}: ${entry.value}${entry.name === "報酬率" ? "%" : ""}`}
           </li>
         ))}
       </ul>
       <hr />
-      <p className="text-rose-400 font-semibold">準確率：{accuracy}%</p>
+      <p className="text-rose-400 font-semibold">
+        {compareData(payload, payload[0].name, payload[1].name)}
+      </p>
     </div>
   )
 }
 
 function AccuracyChart({ layout }: { layout?: string }) {
+  const [labelA, setLabelA] = useState<string>("報酬率")
+  const [labelB, setLabelB] = useState<string>("成交筆數")
   return (
-    <div className={cn("py-4 bg-white rounded-md shadow-md", layout)}>
+    <div
+      className={cn("py-4 pr-4 bg-white rounded-md shadow-md relative", layout)}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="block absolute top-1 right-1 z-10"
+          >
+            更改參數
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 bg-white ">
+          <DropdownMenuLabel>參數1</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={labelA}
+            onValueChange={setLabelA}
+            className="*:dropdownList"
+          >
+            <DropdownMenuRadioItem
+              value="報酬率"
+              disabled={labelB === "報酬率"}
+            >
+              報酬率
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem
+              value="獲利筆數"
+              disabled={labelB === "獲利筆數"}
+            >
+              獲利筆數
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem
+              value="成交筆數"
+              disabled={labelB === "成交筆數"}
+            >
+              成交筆數
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+          <hr />
+          <DropdownMenuLabel>參數2</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={labelB}
+            onValueChange={setLabelB}
+            className="*:dropdownList"
+          >
+            <DropdownMenuRadioItem
+              value="報酬率"
+              disabled={labelA === "報酬率"}
+            >
+              報酬率
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem
+              value="獲利筆數"
+              disabled={labelA === "獲利筆數"}
+            >
+              獲利筆數
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem
+              value="成交筆數"
+              disabled={labelA === "成交筆數"}
+            >
+              成交筆數
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <ResponsiveContainer width="100%" height={360}>
         <AreaChart
           data={data}
@@ -80,14 +217,14 @@ function AccuracyChart({ layout }: { layout?: string }) {
           <Legend />
           <Area
             type="monotone"
-            dataKey="成交筆數"
+            dataKey={labelA}
             stroke="#8884d8"
             fillOpacity={1}
             fill="url(#colorUv)"
           />
           <Area
             type="monotone"
-            dataKey="報酬率"
+            dataKey={labelB}
             stroke="#82ca9d"
             fillOpacity={1}
             fill="url(#colorPv)"

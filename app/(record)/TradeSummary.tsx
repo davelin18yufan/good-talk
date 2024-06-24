@@ -11,7 +11,7 @@ import {
   TableFooter,
 } from "@/components/ui/table"
 import { Asset, CurrentPrices } from "@/types/fugle.t"
-import { cn } from "@/utils"
+import { cn, formatNumber } from "@/utils"
 
 const TradeSummary = ({
   asset,
@@ -41,23 +41,19 @@ const TradeSummary = ({
         icons={[{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }]}
       />
 
-      {/* table tag default display is table and Next will report if thead/tfoot are not inside table */}
-      {/* Wrapping them into Table and separate into 3 parts */}
-      <Table>
-        <TableHeader>
-          <TableRow className="*:lg:px-0">
-            <TableHead>ID</TableHead>
-            <TableHead>標的</TableHead>
-            <TableHead>成本</TableHead>
-            <TableHead>現價</TableHead>
-            <TableHead className="text-right">損益</TableHead>
-          </TableRow>
-        </TableHeader>
-      </Table>
-
       {/* using wrapper for scrolling and max-height */}
       <div className="max-h-[30vh] overflow-y-scroll overscroll-contain relative">
         <Table>
+          <TableHeader>
+            <TableRow className="*:lg:px-0">
+              <TableHead>ID</TableHead>
+              <TableHead>標的</TableHead>
+              <TableHead>成本</TableHead>
+              <TableHead>現價</TableHead>
+              <TableHead>數量</TableHead>
+              <TableHead className="text-right">損益</TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {position.map((p) => {
               let profit = ""
@@ -85,6 +81,7 @@ const TradeSummary = ({
                   <TableCell>{p.asset_name}</TableCell>
                   <TableCell>{p.cost}</TableCell>
                   <TableCell>{marketPrice?.closePrice}</TableCell>
+                  <TableCell>{formatNumber(p.quantity)}</TableCell>
                   {profit.length ? (
                     <TableCell className="text-right">{profit}</TableCell>
                   ) : (

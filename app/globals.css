@@ -3,12 +3,19 @@
   @tailwind utilities;
 
   @layer base {
-   
+    
+   button {
+    @apply focus:outline-0 focus:ring-0 hover:bg-slate-50 focus-visible:ring-0 focus-visible:outline-0 focus-visible:ring-offset-0 focus-visible:ring-transparent
+   }
   }
 
   @layer components {
     .dateBtn {
       @apply px-4 py-2 rounded-md bg-teal-500 text-white font-bold transition duration-200 hover:bg-white hover:text-black border-2 border-transparent hover:border-teal-500
+    }
+
+    .dropdownList {
+      @apply hover:bg-slate-100 cursor-pointer rounded-sm
     }
   }
 
