@@ -21,8 +21,9 @@ import {
   Legend,
 } from "recharts"
 import { useState } from "react"
+import { PnLChartData, PnLChartDataKeys } from "@/types/data"
 
-const data = [
+const data:PnLChartData[] = [
   {
     week: "June/1",
     成交筆數: 118,
@@ -48,6 +49,7 @@ const data = [
     獲利筆數: 10,
   },
 ]
+const dataKeys: PnLChartDataKeys[] = ["成交筆數", "報酬率", "獲利筆數"] 
 
 const renderTooltipContent = ({ payload = [] }: any) => {
   if (!payload || !payload.length) return null
@@ -147,24 +149,15 @@ function AccuracyChart({ layout }: { layout?: string }) {
             onValueChange={setLabelA}
             className="*:dropdownList"
           >
-            <DropdownMenuRadioItem
-              value="報酬率"
-              disabled={labelB === "報酬率"}
-            >
-              報酬率
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem
-              value="獲利筆數"
-              disabled={labelB === "獲利筆數"}
-            >
-              獲利筆數
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem
-              value="成交筆數"
-              disabled={labelB === "成交筆數"}
-            >
-              成交筆數
-            </DropdownMenuRadioItem>
+            {dataKeys.map((value) => (
+              <DropdownMenuRadioItem
+                key={value}
+                value={value}
+                disabled={labelB === value}
+              >
+                {value}
+              </DropdownMenuRadioItem>
+            ))}
           </DropdownMenuRadioGroup>
           <hr />
           <DropdownMenuLabel>參數2</DropdownMenuLabel>
@@ -173,24 +166,15 @@ function AccuracyChart({ layout }: { layout?: string }) {
             onValueChange={setLabelB}
             className="*:dropdownList"
           >
-            <DropdownMenuRadioItem
-              value="報酬率"
-              disabled={labelA === "報酬率"}
-            >
-              報酬率
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem
-              value="獲利筆數"
-              disabled={labelA === "獲利筆數"}
-            >
-              獲利筆數
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem
-              value="成交筆數"
-              disabled={labelA === "成交筆數"}
-            >
-              成交筆數
-            </DropdownMenuRadioItem>
+            {["報酬率", "獲利筆數", "成交筆數"].map((value) => (
+              <DropdownMenuRadioItem
+                key={value}
+                value={value}
+                disabled={labelA === value}
+              >
+                {value}
+              </DropdownMenuRadioItem>
+            ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>

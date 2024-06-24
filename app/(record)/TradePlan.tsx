@@ -165,7 +165,7 @@ function TradePlan({ layout }: { layout?: string }) {
       comment: "some comment",
     },
     {
-      _id: "123456789",
+      _id: "123456780",
       type: "多單",
       target: {
         symbol: "AAPL",
