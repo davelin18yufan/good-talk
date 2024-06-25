@@ -59,6 +59,10 @@ export default async function TradeRecord() {
           layout="col-span-1 md:col-span-2 lg:col-span-1"
         />
 
+        {/* 已實現紀錄 */}
+
+        {/* 資金水位圓餅圖 */}
+
         {/* 已實現的績效紀錄線圖 */}
         <RealizedPnLChart layout="col-span-1" />
 

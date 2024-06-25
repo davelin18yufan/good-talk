@@ -1,28 +1,43 @@
+"use client"
 import { BsFillCloudPlusFill, BsCloudMinus } from "react-icons/bs"
-import { Dock, DockIcon } from "@/components/Dock"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import MainForm from "./forms/MainForm"
+import { FormTypes } from "@/types/data.t"
+import LogForm from "./forms/LogForm"
+import PlanForm from "./forms/PlanForm"
 
 export default function SectionTitle({
   title,
-  dockClasses = "p-0 border-none m-0 h-auto",
-  magnification = 50,
-  icons = [
-    {icon:<BsFillCloudPlusFill className="h-5 w-5" />, name:"plus"},
-    {icon:<BsCloudMinus className="h-5 w-5" />, name:"minus"},
-  ],
+  icon = { icon: <BsFillCloudPlusFill className="h-5 w-5" />, name: "plus" },
+  formType,
 }: {
   title: string
-  dockClasses?: string
-  magnification?: number
-  icons?: {icon:React.ReactNode, name:string}[]
+  icon?: { icon: React.ReactNode; name: string }
+  formType: (typeof FormTypes)[number]
 }) {
   return (
     <div className="flex justify-between items-center mb-2">
       <h2 className="text-xl font-bold">{title}</h2>
-      <Dock className={dockClasses} magnification={magnification}>
-        {icons.map((item) => (
-          <DockIcon key={item.name}>{item.icon}</DockIcon>
-        ))}
-      </Dock>
+      <Dialog>
+        <div className="flex items-center justify-end">
+          <DialogTrigger asChild key={icon.name}>
+            <Button
+              variant="secondary"
+              className="hover:scale-110 transition-transform btn-primary rounded-full"
+            >
+              {icon.icon}
+            </Button>
+          </DialogTrigger>
+        </div>
+        <DialogContent className="sm:max-w-[425px] border-none">
+          {formType === "main" && (
+            <MainForm title="主設定" description="庫存、資金、成本" />
+          )}
+          {formType === "log" && <LogForm title="交易紀錄設定" />}
+          {formType === "plan" && <PlanForm title="規劃設定" />}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

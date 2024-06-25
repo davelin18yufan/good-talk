@@ -38,7 +38,8 @@ const TradeSummary = ({
     <div className={cn("p-4 bg-white rounded-md shadow-md relative", layout)}>
       <SectionTitle
         title="我的庫存"
-        icons={[{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }]}
+        icon={{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }}
+        formType='main'
       />
 
       {/* using wrapper for scrolling and max-height */}

@@ -21,9 +21,9 @@ import {
   Legend,
 } from "recharts"
 import { useState } from "react"
-import { PnLChartData, PnLChartDataKeys } from "@/types/data"
+import { PnLChartData, PnLChartDataKeys } from "@/types/data.t"
 
-const data:PnLChartData[] = [
+const data: PnLChartData[] = [
   {
     week: "June/1",
     成交筆數: 118,
@@ -49,7 +49,7 @@ const data:PnLChartData[] = [
     獲利筆數: 10,
   },
 ]
-const dataKeys: PnLChartDataKeys[] = ["成交筆數", "報酬率", "獲利筆數"] 
+const dataKeys: PnLChartDataKeys[] = ["成交筆數", "報酬率", "獲利筆數"]
 
 const renderTooltipContent = ({ payload = [] }: any) => {
   if (!payload || !payload.length) return null

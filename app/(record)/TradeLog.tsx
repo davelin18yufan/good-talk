@@ -138,7 +138,7 @@ function Log({ log }: { log: LogType }) {
             badgeVariant="secondary"
           />
           <TooltipCard
-            content={{ trigger: formatNumber(log.price), tooltip: "成交價" }}
+            content={{ trigger: `$${formatNumber(log.price)}`, tooltip: "成交價" }}
             badgeVariant="secondary"
           />
           <TooltipCard
@@ -203,7 +203,7 @@ const TradeLog = async ({ className }: { className?: string }) => {
   // const trades = await getTradeLog(selectDate)
   return (
     <div className={cn("p-4 bg-white rounded-md shadow-md", className)}>
-      <SectionTitle title="交易紀錄" />
+      <SectionTitle title="交易紀錄" formType='log'/>
       <AllLogs />
     </div>
   )

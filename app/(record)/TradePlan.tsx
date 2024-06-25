@@ -187,7 +187,7 @@ function TradePlan({ layout }: { layout?: string }) {
         layout
       )}
     >
-      <SectionTitle title="進出場規劃" />
+      <SectionTitle title="進出場規劃" formType='plan'/>
       <div className="centerAll flex-col gap-2">
         {plans.map((plan) => (
           <PlanCard plan={plan} key={plan._id} />
