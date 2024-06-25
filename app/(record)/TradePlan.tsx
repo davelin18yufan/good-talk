@@ -183,7 +183,7 @@ function TradePlan({ layout }: { layout?: string }) {
   return (
     <div
       className={cn(
-        "p-4 rounded-md shadow-md bg-white overflow-y-auto",
+        "section p-4 overflow-y-auto",
         layout
       )}
     >

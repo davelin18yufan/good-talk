@@ -131,7 +131,7 @@ function AccuracyChart({ layout }: { layout?: string }) {
   const [labelB, setLabelB] = useState<string>("成交筆數")
   return (
     <div
-      className={cn("py-4 pr-4 bg-white rounded-md shadow-md relative", layout)}
+      className={cn("section pr-4", layout)}
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

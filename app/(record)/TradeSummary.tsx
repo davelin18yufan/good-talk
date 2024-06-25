@@ -35,7 +35,7 @@ const TradeSummary = ({
   )
 
   return (
-    <div className={cn("p-4 bg-white rounded-md shadow-md relative", layout)}>
+    <div className={cn("section p-4", layout)}>
       <SectionTitle
         title="我的庫存"
         icon={{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }}

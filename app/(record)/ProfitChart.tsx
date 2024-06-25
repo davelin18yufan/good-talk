@@ -55,7 +55,7 @@ const data = [
 
 export default function ProfitChart({ layout }: { layout: string }) {
   return (
-    <div className={cn("py-4 bg-white rounded-md shadow-md relative", layout)}>
+    <div className={cn("section", layout)}>
       <ResponsiveContainer width="100%" height={360}>
         <ComposedChart
           data={data}

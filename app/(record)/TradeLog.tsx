@@ -202,7 +202,7 @@ const TradeLog = async ({ className }: { className?: string }) => {
   // const { selectDate } = useDate((store) => store.selectDate)
   // const trades = await getTradeLog(selectDate)
   return (
-    <div className={cn("p-4 bg-white rounded-md shadow-md", className)}>
+    <div className={cn("section p-4", className)}>
       <SectionTitle title="交易紀錄" formType='log'/>
       <AllLogs />
     </div>
