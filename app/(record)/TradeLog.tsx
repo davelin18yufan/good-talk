@@ -4,13 +4,8 @@ import { Tabs } from "@/components/Tabs"
 import { cn, formatNumber } from "@/utils"
 import { useDate } from "@/store/date"
 import { Log as LogType} from "@/types/fugle.t"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { Badge, badgeVariants } from "@/components/ui/badge"
+import TooltipCard from "@/components/TooltipCard"
 
 const fakeLogs: LogType[] = [
   {
@@ -78,39 +73,6 @@ const fakeLogs: LogType[] = [
     quantity: 20,
   },
 ]
-
-function TooltipCard({
-  content,
-  badgeClassName = "bg-slate-100",
-  badgeVariant = "default",
-  tooltipSide = "bottom",
-  tooltipClassName = "bg-white rounded-lg p-1",
-}: {
-  content: { trigger: string | number; tooltip: string }
-  badgeVariant?: "default" | "secondary" | "destructive" | "outline" | null
-  badgeClassName?: string
-  tooltipSide?: "bottom" | "top" | "right" | "left"
-  tooltipClassName?: string
-}) {
-  return (
-    <TooltipProvider delayDuration={500}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge variant={badgeVariant} className={badgeClassName}>
-            {content.trigger}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent
-          side={tooltipSide}
-          sideOffset={1}
-          className={tooltipClassName}
-        >
-          <p>{content.tooltip}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
-}
 
 function Log({ log }: { log: LogType }) {
   return (

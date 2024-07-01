@@ -1,6 +1,7 @@
 import "../globals.css"
 
 import { Inter } from "next/font/google"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,7 +24,7 @@ export default function RootLayout({
             <h1 className="text-2xl font-bold text-center">Dashboard</h1>
           </div>
         </nav>
-        {children}
+        <TooltipProvider delayDuration={500}>{children}</TooltipProvider>
       </body>
     </html>
   )

@@ -7,6 +7,7 @@ import ProfitChart from "../ProfitChart"
 
 import { getPositionCurrentPrices } from "@/actions/fugle.action"
 import { cn } from "@/utils"
+import FundPieChart from "../FundPieChart"
 
 // TODO: 架設資料庫
 // TODO: 建立Schema
@@ -60,8 +61,10 @@ export default async function TradeRecord() {
         />
 
         {/* 已實現紀錄 */}
+        
 
         {/* 資金水位圓餅圖 */}
+        <FundPieChart layout="col-span-1 md:col-span-2" />
 
         {/* 已實現的績效紀錄線圖 */}
         <RealizedPnLChart layout="col-span-1" />
