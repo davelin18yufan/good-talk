@@ -119,3 +119,9 @@ export interface Performance {
   me: number
   relativePerformance: number
 }
+
+export interface News {
+  title?: string
+  href?: string
+  category?: string
+}

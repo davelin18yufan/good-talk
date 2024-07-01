@@ -20,6 +20,8 @@ export default {
       },
       animation: {
         grid: "grid 15s linear infinite",
+        scroll:
+          "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },
       keyframes: {
         grid: {
@@ -35,6 +37,11 @@ export default {
           },
           to: {
             "background-position": "0% 0%",
+          },
+        },
+        scroll: {
+          to: {
+            transform: "translate(calc(-50% - 0.5rem))",
           },
         },
       },
