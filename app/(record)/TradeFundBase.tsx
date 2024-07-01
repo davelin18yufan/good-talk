@@ -3,8 +3,9 @@ import { NoteTooltip } from "@/components/TooltipCard"
 import { cn } from "@/utils"
 import { TiLightbulb } from "react-icons/ti"
 import FundPieChart from "./FundPieChart"
-import { News } from "./database"
 import { InfiniteMovingCards } from "@/components/InfiniteMovingCards"
+import { getNewsInfo } from "./action"
+import { Suspense } from "react"
 
 const getGradientClassForValue = (value: number) => {
   if (value <= 25) return "from-slate-500 to-sky-500"
@@ -26,18 +27,15 @@ export default async function TradeFundBase({ layout }: { layout?: string }) {
   // TODO: Calculate level => 持股總成本/資金
   const level = 70
 
-  const res = await fetch(`${process.env.PRODUCTION_URL}/api/crawler`)
-  const resJson = await res?.json()
-  const news = resJson.map((item: News) => ({
-    title: item.category,
-    quote: item.title,
-    href: item.href
-  }))
+  const news = await getNewsInfo()
 
+  const Loading = () => (<div className="animate-pulse mt-auto text-gray-200 mx-auto p-2">Loading News...</div>)
 
   return (
     <div className={cn("section px-4 flex flex-col", layout)}>
-      <InfiniteMovingCards items={news} speed="slow" />
+      <Suspense fallback={<Loading />}>
+        <InfiniteMovingCards items={news} speed="slow" />
+      </Suspense>
 
       <div className="flex justify-around items-center gap-4">
         <div className="hidden sm:block">
@@ -49,7 +47,10 @@ export default async function TradeFundBase({ layout }: { layout?: string }) {
             {[0, 50, 100, 150, 200].map((value, index) => (
               <TiLightbulb
                 key={index}
-                className={cn("w-4 h-4 md:h-5 md:w-5 aspect-square", level >= value && "text-yellow-600")}
+                className={cn(
+                  "w-4 h-4 md:h-5 md:w-5 aspect-square",
+                  level >= value && "text-yellow-600"
+                )}
               />
             ))}
           </div>

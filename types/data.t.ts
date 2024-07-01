@@ -15,3 +15,18 @@ export type BaseForm = {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   children: React.ReactNode
 }
+
+export interface News {
+  title?: string
+  href?: string
+  category?: string
+  imageUrl?: string
+}
+
+export interface NewsParsed {
+  quote: string
+  name: string
+  title: string
+  href: string
+  imageUrl: string
+}

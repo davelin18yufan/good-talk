@@ -7,4 +7,14 @@ module.exports = {
   logging: {
     fetches: { fullUrl: false },
   },
-};
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cimg.cnyes.cool",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
+}
