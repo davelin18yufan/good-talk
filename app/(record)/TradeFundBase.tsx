@@ -29,7 +29,7 @@ export default async function TradeFundBase({ layout }: { layout?: string }) {
 
   const news = await getNewsInfo()
 
-  const Loading = () => (<div className="animate-pulse mt-auto text-gray-200 mx-auto p-2">Loading News...</div>)
+  const Loading = () => (<div className="animate-pulse mt-auto text-gray-200 mx-auto p-2 text-center">Loading News...</div>)
 
   return (
     <div className={cn("section px-4 flex flex-col", layout)}>

@@ -70,7 +70,7 @@ const renderActiveShape = (props: any) => {
         textAnchor={textAnchor}
         fill="#999"
       >
-        {`(${(percent * 100).toFixed(2)}%)`}
+        {`Total (${(percent * 100).toFixed(2)}%)`}
       </text>
     </g>
   )
@@ -87,7 +87,7 @@ export default function FundPieChart({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={360}>
+    <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
           activeIndex={activeIndex}
