@@ -3,7 +3,7 @@ import { News, NewsParsed } from "@/types/data.t"
 export async function getNewsInfo(): Promise<NewsParsed[]> {
   try {
     // cached lifetime = 300s
-    const res = await fetch(`http://localhost:3000/api/crawler`, {
+    const res = await fetch(`${process.env.NEXT_PRODUCTION_URL}/api/crawler`, {
       next: { revalidate: 300 },
     })
     const resJson = await res?.json()
