@@ -1,18 +1,36 @@
-import { News, NewsParsed } from "@/types/data.t"
+import { News } from "@/types/data.t"
+import * as cheerio from "cheerio"
 
-export async function getNewsInfo(): Promise<NewsParsed[]> {
+const baseUrl = "https://news.cnyes.com" as const
+const url = "https://news.cnyes.com/news/cat/headline" as const
+
+// Get headlines from 鉅亨網
+export async function getNewsInfo(): Promise<News[]> {
+  let output: News[] = []
   try {
-    // cached lifetime = 300s
-    const res = await fetch(`${process.env.NEXT_PRODUCTION_URL}/api/crawler`, {
-      next: { revalidate: 300 },
+    const res = await fetch(url)
+    const body = new Response(res.body)
+    const parseBody = await body.text()
+    const $ = cheerio.load(parseBody)
+
+    $(".l6okjhz").each(function (index, element) {
+      const title = $(element).find(".list-title a").attr("title")
+      const href = $(element).find(".list-title a").attr("href")
+      const category = $(element).find(".c1m5ajah span").text()
+      const imageUrl = $(element)
+        .css("--l6okjhz-2")
+        ?.replace(/^url\("|"\)$/g, "")
+
+      const news = {
+        title: category,
+        quote: title,
+        href: baseUrl + href,
+        imageUrl,
+      }
+      output.push(news)
     })
-    const resJson = await res?.json()
-    return resJson.map((item: News) => ({
-      title: item.category,
-      quote: item.title,
-      href: item.href,
-      imageUrl: item.imageUrl,
-    }))
+
+    return output
   } catch (err) {
     console.error(err)
     throw err

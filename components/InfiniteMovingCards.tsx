@@ -1,6 +1,6 @@
 "use client"
 
-import { NewsParsed } from "@/types/data.t"
+import { News } from "@/types/data.t"
 import { cn } from "@/utils"
 import React, { useEffect, useState } from "react"
 
@@ -11,7 +11,7 @@ export const InfiniteMovingCards = ({
   pauseOnHover = true,
   className,
 }: {
-  items: NewsParsed[]
+  items: News[]
   direction?: "left" | "right"
   speed?: "fast" | "normal" | "slow"
   pauseOnHover?: boolean

@@ -19,14 +19,8 @@ export type BaseForm = {
 export interface News {
   title?: string
   href?: string
-  category?: string
+  quote?: string
   imageUrl?: string
+  name?:string
 }
 
-export interface NewsParsed {
-  quote: string
-  name: string
-  title: string
-  href: string
-  imageUrl: string
-}
