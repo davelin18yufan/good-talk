@@ -21,6 +21,5 @@ export interface News {
   href?: string
   quote?: string
   imageUrl?: string
-  name?:string
+  name?: string
 }
-

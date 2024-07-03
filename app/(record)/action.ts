@@ -8,24 +8,25 @@ const url = "https://news.cnyes.com/news/cat/headline" as const
 export async function getNewsInfo(): Promise<News[]> {
   let output: News[] = []
   try {
-    const res = await fetch(url)
+    const res = await fetch(url, { next: { revalidate: 300 } })
     const body = new Response(res.body)
     const parseBody = await body.text()
     const $ = cheerio.load(parseBody)
 
-    $(".l6okjhz").each(function (index, element) {
-      const title = $(element).find(".list-title a").attr("title")
-      const href = $(element).find(".list-title a").attr("href")
-      const category = $(element).find(".c1m5ajah span").text()
-      const imageUrl = $(element)
-        .css("--l6okjhz-2")
-        ?.replace(/^url\("|"\)$/g, "")
+    $("a[href*='/news/id']").each(function (index, element) {
+      const title = $(element).find("h3").text()
+      const href = $(element).attr("href")
+      const category = $(element).parent("div").find("button").text()
+      const rawImageUrl = $(element).find("div[style*='url']").attr("style")
+      const imageUrlMatch = rawImageUrl?.match(/url\((.*?)\)/)
+      const imageUrl = imageUrlMatch ? imageUrlMatch[1] : ""
 
       const news = {
-        title: category,
+        title: category || "鉅亨網",
         quote: title,
         href: baseUrl + href,
-        imageUrl,
+        imageUrl: `url(${imageUrl})`,
+        name: "",
       }
       output.push(news)
     })

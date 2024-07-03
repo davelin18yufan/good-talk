@@ -5,7 +5,6 @@ import { TiLightbulb } from "react-icons/ti"
 import FundPieChart from "./FundPieChart"
 import { InfiniteMovingCards } from "@/components/InfiniteMovingCards"
 import { getNewsInfo } from "./action"
-import { Suspense } from "react"
 
 const getGradientClassForValue = (value: number) => {
   if (value <= 25) return "from-slate-500 to-sky-500"
@@ -28,14 +27,19 @@ export default async function TradeFundBase({ layout }: { layout?: string }) {
   const level = 70
 
   const news = await getNewsInfo()
-
-  const Loading = () => (<div className="animate-pulse mt-auto text-gray-200 mx-auto p-2 text-center">Loading News...</div>)
+  const Loading = () => (
+    <div className="animate-pulse mt-auto text-gray-200 mx-auto p-2 text-center">
+      Loading News...
+    </div>
+  )
 
   return (
     <div className={cn("section px-4 flex flex-col", layout)}>
-      <Suspense fallback={<Loading />}>
+      {news.length > 0 ? (
         <InfiniteMovingCards items={news} speed="slow" />
-      </Suspense>
+      ) : (
+        <Loading />
+      )}
 
       <div className="flex justify-around items-center gap-4">
         <div className="hidden sm:block">
