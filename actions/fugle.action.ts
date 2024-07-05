@@ -1,6 +1,6 @@
 'use server'
 
-import { CurrentPrices } from "@/types/fugle.t"
+import { CurrentPrice } from "@/types/fugle.t"
 
 const BASE_URL = "https://api.fugle.tw/marketdata/v1.0/stock"
 const API_KEY = process.env.FUGLE_GET_API_KEY
@@ -29,7 +29,7 @@ export async function getStock(symbol: string) {
 
 // transform stock data array
 export async function getPositionCurrentPrices(symbols: string[]) {
-  const prices: CurrentPrices = []
+  const prices: CurrentPrice[] = []
 
   for (const s of symbols) {
     try {

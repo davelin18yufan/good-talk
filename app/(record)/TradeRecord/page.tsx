@@ -4,18 +4,15 @@ import TradePlan from "../TradePlan"
 import TradeSummary from "../TradeSummary"
 import RealizedPnLChart from "../RealizedPnLChart"
 import ProfitChart from "../ProfitChart"
+import TradeFundBase from "../TradeFundBase"
 
 import { getPositionCurrentPrices } from "@/actions/fugle.action"
 import { cn } from "@/utils"
-import TradeFundBase from "../TradeFundBase"
-
-// TODO: 架設資料庫
-// TODO: 建立Schema
-// TODO: 定義可能使用的CRUD
-// 1. 庫存 2. 交易紀錄 3. 規劃 4. 標的如果不存在自動新增
+import { getPosition } from "@/database/vercel-postgres"
+import { Asset } from "@/types/fugle.t"
 
 const dummyData = {
-  user_id: "123",
+  user_id: "1",
   username: "Dave",
   email: "test@example.com",
   asset: {
@@ -40,9 +37,30 @@ const dummyData = {
 }
 
 export default async function TradeRecord() {
-  // get current position market price
-  const symbols = dummyData.asset.position.map((item) => item.asset_id)
+  // get positions 庫存
+  const assets = await getPosition(dummyData.user_id)
+
+  // get current position market price 庫存現價
+  const symbols = assets?.map((item) => item.target)
   const currentPrices = await getPositionCurrentPrices(symbols)
+
+  // Total market value 庫存總市值
+  const totalMarketValue = currentPrices?.reduce((acc, cur) => {
+    const asset = assets?.find((a) => a.target === cur.symbol)
+    const quantity = asset?.quantity ?? 0 // type safe
+    return acc + cur.closePrice * quantity
+  }, 0)
+
+  // unrealized profit 庫存損益
+  const calculateProfit = (asset: Asset) => {
+    const { target, quantity, cost } = asset
+    const marketValue = currentPrices.find((c) => c.symbol === target)
+    return marketValue ? quantity * (marketValue.closePrice - cost) : 0
+  }
+  const unrealizedAssets = assets.map((a) => ({
+    ...a,
+    profit: calculateProfit(a),
+  }))
 
   return (
     <div className="flex flex-col">
@@ -55,13 +73,12 @@ export default async function TradeRecord() {
       >
         {/* 庫存 */}
         <TradeSummary
-          asset={dummyData.asset}
+          assets={unrealizedAssets}
           currentPrices={currentPrices}
           layout="col-span-1 md:col-span-2 lg:col-span-1"
         />
 
         {/* 已實現紀錄 */}
-        
 
         {/* 資金水位圓餅圖 */}
         <TradeFundBase layout="col-span-1 md:col-span-2" />

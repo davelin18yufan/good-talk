@@ -1,9 +1,10 @@
 import NumberTicker from "@/components/NumberTicker"
-import { NoteTooltip } from "@/components/TooltipCard"
-import { cn } from "@/utils"
-import { TiLightbulb } from "react-icons/ti"
 import FundPieChart from "./FundPieChart"
 import { InfiniteMovingCards } from "@/components/InfiniteMovingCards"
+import { NoteTooltip } from "@/components/TooltipCard"
+
+import { cn } from "@/utils"
+import { TiLightbulb } from "react-icons/ti"
 import { getNewsInfo } from "./action"
 
 const getGradientClassForValue = (value: number) => {

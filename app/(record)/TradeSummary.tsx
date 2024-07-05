@@ -10,36 +10,27 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table"
-import { Asset, CurrentPrices } from "@/types/fugle.t"
+import { CurrentPrice, UnrealizedAsset } from "@/types/fugle.t"
 import { cn, formatNumber } from "@/utils"
 
 const TradeSummary = ({
-  asset,
+  assets,
   currentPrices,
   layout,
 }: {
-  asset: Asset
-  currentPrices: CurrentPrices
+  assets: UnrealizedAsset[]
+  currentPrices: CurrentPrice[]
   layout?: string
 }) => {
-  const { totalCost, totalMarketPrice, position } = asset
-  // TODO: 未實現應該從庫存去計算，水位＝庫存成本/資產
-  const unrealizedProfit = (totalMarketPrice - totalCost).toLocaleString(
-    "en-US",
-    {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  )
+  // calculate position profit
+  const unrealizedProfit = assets.reduce((acc, cur) => acc + cur.profit, 0)
 
   return (
     <div className={cn("section p-4", layout)}>
       <SectionTitle
         title="我的庫存"
         icon={{ icon: <RiHomeGearLine className="h-5 w-5" />, name: "gear" }}
-        formType='main'
+        formType="main"
       />
 
       {/* using wrapper for scrolling and max-height */}
@@ -56,40 +47,28 @@ const TradeSummary = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {position.map((p) => {
-              let profit = ""
+            {assets.map((a) => {
               const marketPrice = currentPrices.find(
-                (price) => price.symbol === p.asset_id
+                (price) => price.symbol === a.target
               )
-              if (marketPrice) {
-                profit = (
-                  (marketPrice?.closePrice - p.cost) *
-                  p.quantity
-                ).toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })
-              }
 
               return (
                 <TableRow
                   className="text-xs text-slate-500 *:lg:px-0"
-                  key={p.asset_id}
+                  key={a.target}
                 >
-                  <TableCell>{p.asset_id}</TableCell>
-                  <TableCell>{p.asset_name}</TableCell>
-                  <TableCell>{p.cost}</TableCell>
-                  <TableCell>{marketPrice?.closePrice}</TableCell>
-                  <TableCell>{formatNumber(p.quantity)}</TableCell>
-                  {profit.length ? (
-                    <TableCell className="text-right">{profit}</TableCell>
-                  ) : (
-                    <TableCell className="text-right text-slate-400 animate-pulse">
-                      Calculating..
-                    </TableCell>
-                  )}
+                  <TableCell>{a.target}</TableCell>
+                  <TableCell>{a.target_name}</TableCell>
+                  <TableCell>{a.cost}</TableCell>
+                  <TableCell>
+                    {marketPrice
+                      ? formatNumber(marketPrice?.closePrice)
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell>{formatNumber(a.quantity)}</TableCell>
+                  <TableCell className="text-right">
+                    {formatNumber(a.profit)}
+                  </TableCell>
                 </TableRow>
               )
             })}
@@ -104,7 +83,7 @@ const TradeSummary = ({
               未實現損益
             </TableCell>
             <TableCell className="text-right text-red-500">
-              {unrealizedProfit}
+              {formatNumber(unrealizedProfit)}
             </TableCell>
           </TableRow>
         </TableFooter>

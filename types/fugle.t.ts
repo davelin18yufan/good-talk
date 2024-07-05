@@ -1,19 +1,32 @@
-export type CurrentPrices = {
+export interface CurrentPrice {
   symbol: string
   name: string
   closePrice: number
-}[]
+}
 
-export type Asset = {
-  _id: string
-  totalCost: number
-  totalMarketPrice: number
-  position: {
-    asset_id: string
-    asset_name: string
-    quantity: number
-    cost: number
-  }[]
+interface BaseDatabaseType {
+  id: string
+  created_at: Date
+  updated_at: Date
+}
+
+export interface User extends BaseDatabaseType {
+  username: string
+  email: string
+  total_cost: number // 總投入資金
+}
+
+export interface Asset extends BaseDatabaseType {
+  user_id: string
+  target: string
+  target_name: string
+  cost: number
+  quantity: number
+  buy_date: Date
+}
+
+export interface UnrealizedAsset extends Asset {
+  profit: number
 }
 
 export type Target = {
