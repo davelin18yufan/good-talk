@@ -6,10 +6,10 @@ import RealizedPnLChart from "../RealizedPnLChart"
 import ProfitChart from "../ProfitChart"
 import TradeFundBase from "../TradeFundBase"
 
-import { getPositionCurrentPrices } from "@/actions/fugle.action"
+import { getPositionCurrentPrices } from "@/actions/fugle"
 import { cn } from "@/utils"
-import { getPosition } from "@/database/vercel-postgres"
-import { Asset } from "@/types/fugle.t"
+import { getPosition } from "@/database/asset.action"
+import { Asset, CurrentPrice, User } from "@/types/fugle.t"
 
 const dummyData = {
   user_id: "1",
@@ -36,31 +36,56 @@ const dummyData = {
   },
 }
 
+const user: User = {
+  id: "1",
+  username: "user1",
+  email: "user1@example.com",
+  availableCapital: 300000,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  leverage: true,
+}
+
 export default async function TradeRecord() {
-  // get positions 庫存
+  // TODO:Fetch User
+  // *Get positions 庫存
   const assets = await getPosition(dummyData.user_id)
 
-  // get current position market price 庫存現價
+  // *Get current position market price 庫存現價
   const symbols = assets?.map((item) => item.target)
   const currentPrices = await getPositionCurrentPrices(symbols)
 
-  // Total market value 庫存總市值
+  // *Total market value 庫存總市值
   const totalMarketValue = currentPrices?.reduce((acc, cur) => {
     const asset = assets?.find((a) => a.target === cur.symbol)
     const quantity = asset?.quantity ?? 0 // type safe
     return acc + cur.closePrice * quantity
   }, 0)
 
-  // unrealized profit 庫存損益
-  const calculateProfit = (asset: Asset) => {
-    const { target, quantity, cost } = asset
+  // *Unrealized profit 庫存損益
+  const calculateProfit = (asset: Asset, currentPrices: CurrentPrice[]) => {
+    const { target, quantity, entryPrice } = asset
     const marketValue = currentPrices.find((c) => c.symbol === target)
-    return marketValue ? quantity * (marketValue.closePrice - cost) : 0
+    return marketValue ? quantity * (marketValue.closePrice - entryPrice) : 0
   }
   const unrealizedAssets = assets.map((a) => ({
     ...a,
-    profit: calculateProfit(a),
+    profit: calculateProfit(a, currentPrices),
   }))
+
+  // *totalInvestmentCost = Total assets cost(For calculating profit) 持有商品的入手成本(計算損益)
+  // *availableCapital = Remaining cash 可用現金
+  const totalInvestmentCost = assets.reduce(
+    (acc, cur) => acc + cur.cost * cur.quantity,
+    0
+  )
+
+  // *totalActualInvestCost = actual spending cost of holding assets.(leverage counted, for calculating capitalRatio)
+  // *實際總投入成本（包含槓桿,計算資金水位用）
+  const totalActualInvestmentCost = assets.reduce(
+    (acc, cur) => cur.cost * cur.quantity + acc,
+    0
+  )
 
   return (
     <div className="flex flex-col">
@@ -81,7 +106,13 @@ export default async function TradeRecord() {
         {/* 已實現紀錄 */}
 
         {/* 資金水位圓餅圖 */}
-        <TradeFundBase layout="col-span-1 md:col-span-2" />
+        <TradeFundBase
+          layout="col-span-1 md:col-span-2"
+          availableCapital={user.availableCapital}
+          totalInvestmentCost={totalInvestmentCost}
+          totalActualInvestmentCost={totalActualInvestmentCost}
+          leverageUsed={user.leverage}
+        />
 
         {/* 已實現的績效紀錄線圖 */}
         <RealizedPnLChart layout="col-span-1" />

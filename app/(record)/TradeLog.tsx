@@ -9,7 +9,7 @@ import TooltipCard from "@/components/TooltipCard"
 
 const fakeLogs: LogType[] = [
   {
-    _id: "1",
+    id: "1",
     type: "多單",
     action: "現股買進",
     target: {
@@ -20,9 +20,11 @@ const fakeLogs: LogType[] = [
     price: 150.25,
     quantity: 1000,
     comment: "在開盤時買入",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    _id: "2",
+    id: "2",
     type: "多單",
     action: "現股賣出",
     target: {
@@ -33,9 +35,11 @@ const fakeLogs: LogType[] = [
     price: 155.75,
     quantity: 100,
     comment: "在高點賣出",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    _id: "3",
+    id: "3",
     type: "多單",
     action: "融資買進",
     target: { symbol: "GOOGL", name: "Google. corp" },
@@ -43,9 +47,11 @@ const fakeLogs: LogType[] = [
     price: 2700.5,
     quantity: 50,
     comment: "使用保證金進行買進",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    _id: "4",
+    id: "4",
     type: "多單",
     action: "融資賣出",
     target: { symbol: "GOOGL", name: "Google. corp" },
@@ -53,24 +59,30 @@ const fakeLogs: LogType[] = [
     price: 2725.0,
     quantity: 50,
     comment: "持有一天後賣出",
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    _id: "5",
+    id: "5",
     type: "空單",
     action: "沖買",
     target: { symbol: "TSLA", name: "Tsela. Inc" },
     date: "09:55",
     price: 900.0,
     quantity: 20,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
-    _id: "6",
+    id: "6",
     type: "空單",
     action: "沖賣",
     target: { symbol: "TSLA", name: "Tsela. Inc" },
     date: "09:50",
     price: 910.0,
     quantity: 20,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
 
@@ -129,21 +141,21 @@ function AllLogs() {
     {
       title: "全部",
       value: "all",
-      content: fakeLogs.map((log) => <Log key={log._id} log={log} />),
+      content: fakeLogs.map((log) => <Log key={log.id} log={log} />),
     },
     {
       title: "多單",
       value: "多單",
       content: fakeLogs
         .filter((log) => log.type === "多單")
-        .map((log) => <Log key={log._id} log={log} />),
+        .map((log) => <Log key={log.id} log={log} />),
     },
     {
       title: "空單",
       value: "空單",
       content: fakeLogs
         .filter((log) => log.type === "空單")
-        .map((log) => <Log key={log._id} log={log} />),
+        .map((log) => <Log key={log.id} log={log} />),
     },
   ]
 

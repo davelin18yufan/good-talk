@@ -5,7 +5,7 @@ import { NoteTooltip } from "@/components/TooltipCard"
 
 import { cn } from "@/utils"
 import { TiLightbulb } from "react-icons/ti"
-import { getNewsInfo } from "./action"
+import { getNewsInfo } from "../../actions/news"
 
 const getGradientClassForValue = (value: number) => {
   if (value <= 25) return "from-slate-500 to-sky-500"
@@ -18,21 +18,38 @@ const getGradientClassForValue = (value: number) => {
   return "from-rose-500 to-red-700"
 }
 
-const data = [
-  { name: "現金水位", value: 200000 },
-  { name: "持倉部位", value: 800000 },
-]
-
-export default async function TradeFundBase({ layout }: { layout?: string }) {
-  // TODO: Calculate level => 持股總成本/資金
-  const level = 70
-
+export default async function TradeFundBase({
+  layout,
+  totalInvestmentCost,
+  availableCapital,
+  totalActualInvestmentCost,
+  leverageUsed = false,
+}: {
+  layout?: string
+  availableCapital: number
+  totalInvestmentCost: number
+  totalActualInvestmentCost: number
+  leverageUsed: boolean
+}) {
   const news = await getNewsInfo()
   const Loading = () => (
     <div className="animate-pulse mt-auto text-gray-200 mx-auto p-2 text-center">
       Loading News...
     </div>
   )
+
+  // *CapitalRatio = totalInvestmentCost / availableCapital 資金水位=已使用資本/總可用資金(融資?)
+  const capitalRatio = leverageUsed
+    ? totalInvestmentCost / availableCapital
+    : totalInvestmentCost / (availableCapital * 2.5)
+  const level = Number(capitalRatio.toPrecision(2)) * 100 // 持股水位
+
+  // *Cash = availableCapital - totalActualInvestmentCost 現金=總可投入資本-總已投入成本
+  const cash = availableCapital - totalActualInvestmentCost
+  const data = [
+    { name: "現金水位", value: cash },
+    { name: "持倉部位", value: totalActualInvestmentCost },
+  ]
 
   return (
     <div className={cn("section px-4 flex flex-col", layout)}>

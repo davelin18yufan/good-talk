@@ -130,7 +130,7 @@ function PlanCard({
 function TradePlan({ layout }: { layout?: string }) {
   const plans: Plan[] = [
     {
-      _id: "123456789",
+      id: "123456789",
       type: "多單",
       target: {
         symbol: "AAPL",
@@ -145,9 +145,11 @@ function TradePlan({ layout }: { layout?: string }) {
       },
       expectation: 150 / 100,
       isExecuted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      _id: "987654321",
+      id: "987654321",
       type: "空單",
       target: {
         symbol: "TSLA",
@@ -163,9 +165,11 @@ function TradePlan({ layout }: { layout?: string }) {
       expectation: 1194 / 900,
       isExecuted: false,
       comment: "some comment",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      _id: "123456780",
+      id: "123456780",
       type: "多單",
       target: {
         symbol: "AAPL",
@@ -177,6 +181,8 @@ function TradePlan({ layout }: { layout?: string }) {
       stop: { type: "停利", price: 150 },
       expectation: 180 / 150,
       isExecuted: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ]
 
@@ -190,7 +196,7 @@ function TradePlan({ layout }: { layout?: string }) {
       <SectionTitle title="進出場規劃" formType='plan'/>
       <div className="centerAll flex-col gap-2">
         {plans.map((plan) => (
-          <PlanCard plan={plan} key={plan._id} />
+          <PlanCard plan={plan} key={plan.id} />
         ))}
       </div>
     </div>
