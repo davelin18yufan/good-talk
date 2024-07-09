@@ -5,6 +5,7 @@ import { Plan } from "@/types/fugle.t"
 import { CheckIcon, CheckCheck } from "lucide-react"
 import ShineBorder from "@/components/ShineBorder"
 import { AnimatedSubscribeButton } from "@/components/SubscribeButton"
+import { getPlans } from "@/database/plan.action"
 
 function ExpectationBar({
   entryPrice,
@@ -100,7 +101,7 @@ function PlanCard({
 
       <div className="mt-2 flex items-center justify-between">
         <button
-          className={`text-sm ${comment ? "text-sky-700" : "text-slate-700"}`}
+          className={`text-sm cursor-pointer hover:bg-transparent ${comment ? "text-sky-700" : "text-slate-700"}`}
           disabled={!comment}
         >
           備註
@@ -127,65 +128,10 @@ function PlanCard({
   )
 }
 
-function TradePlan({ layout }: { layout?: string }) {
-  const plans: Plan[] = [
-    {
-      id: "123456789",
-      type: "多單",
-      target: {
-        symbol: "AAPL",
-        name: "Apple Inc.",
-      },
-      action: "建倉",
-      entryPrice: 113,
-      targetPrice: 150,
-      stop: {
-        type: "停損",
-        price: 100,
-      },
-      expectation: 150 / 100,
-      isExecuted: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "987654321",
-      type: "空單",
-      target: {
-        symbol: "TSLA",
-        name: "Tesla, Inc.",
-      },
-      action: "建倉",
-      entryPrice: 1000,
-      targetPrice: 1194,
-      stop: {
-        type: "停損",
-        price: 900,
-      },
-      expectation: 1194 / 900,
-      isExecuted: false,
-      comment: "some comment",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "123456780",
-      type: "多單",
-      target: {
-        symbol: "AAPL",
-        name: "Apple Inc.",
-      },
-      action: "出場",
-      entryPrice: 155,
-      targetPrice: 180,
-      stop: { type: "停利", price: 150 },
-      expectation: 180 / 150,
-      isExecuted: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ]
-
+async function TradePlan({ layout }: { layout?: string }) {
+  
+  const plans = await getPlans('1')
+  
   return (
     <div
       className={cn(

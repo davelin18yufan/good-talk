@@ -26,7 +26,7 @@ export const AnimatedSubscribeButton: React.FC<
     <AnimatePresence mode="wait">
       {isSubscribed ? (
         <motion.button
-          className="relative flex max-lg:w-[200px] items-center justify-center overflow-hidden rounded-md p-[10px] "
+          className="relative flex max-lg:w-[200px] items-center justify-center overflow-hidden rounded-md p-[10px] hover:bg-transparent"
           onClick={() => setIsSubscribed(false)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

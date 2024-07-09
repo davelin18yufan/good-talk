@@ -1,4 +1,4 @@
-'use server'
+"use server"
 
 import { CurrentPrice } from "@/types/fugle.t"
 
@@ -13,8 +13,8 @@ export async function getStock(symbol: string) {
   try {
     const res = await fetch(`${BASE_URL}/intraday/quote/${symbol}`, {
       headers,
-      next: { 
-        tags: ["position"], 
+      next: {
+        tags: ["position"],
         // revalidate: 500
       },
     })
@@ -24,6 +24,34 @@ export async function getStock(symbol: string) {
   } catch (error) {
     console.error(error)
     throw new Error(`Get Stock ${symbol} error: ${error}`)
+  }
+}
+
+// Get stock info
+export async function getStockInfo(
+  target: string
+): Promise<{
+  market: string
+  symbol: string
+  name: string
+  industry: string
+  securityType: string
+}> {
+  try {
+    const res = await fetch(`${BASE_URL}/intraday/ticker/${target}`, {
+      headers,
+      next: {
+        tags: ["info"],
+      },
+    })
+    if (!res.ok) throw Error
+
+    const { market, symbol, name, industry, securityType } = await res.json()
+
+    return { market, symbol, name, industry, securityType }
+  } catch (error) {
+    console.error(error)
+    throw new Error(`Get Stock Info ${target} error: ${error}`)
   }
 }
 
