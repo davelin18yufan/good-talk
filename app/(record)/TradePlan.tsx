@@ -6,6 +6,7 @@ import { CheckIcon, CheckCheck } from "lucide-react"
 import ShineBorder from "@/components/ShineBorder"
 import { AnimatedSubscribeButton } from "@/components/SubscribeButton"
 import { getPlans } from "@/database/plan.action"
+import { useDate } from "@/store/date"
 
 function ExpectationBar({
   entryPrice,
@@ -129,8 +130,8 @@ function PlanCard({
 }
 
 async function TradePlan({ layout }: { layout?: string }) {
-  
-  const plans = await getPlans('1')
+  // const { selectedDate } = useDate((store) => store.selectedDate)
+  const plans = await getPlans("1", "2023-07-04")
   
   return (
     <div

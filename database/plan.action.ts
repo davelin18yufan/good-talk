@@ -1,15 +1,18 @@
+"use server"
 import { Plan } from "@/types/fugle.t"
 import { sql } from "@vercel/postgres"
 
 // *Get trade plans
-export async function getPlans(userId: string): Promise<Plan[]> {
+export async function getPlans(userId: string, date: string): Promise<Plan[]> {
   try {
     const { rows } = await sql`
         SELECT plans.*,targets.symbol AS target_symbol,targets.name AS target_name 
         FROM plans 
         LEFT JOIN targets 
         ON plans.target_id = targets.id 
-        WHERE plans.user_id = ${userId}`
+        WHERE plans.user_id = ${userId}
+        AND DATE(created_at) = ${date}
+        ORDER BY created_at;`
 
     return rows.map((row) => ({
       id: row.id,

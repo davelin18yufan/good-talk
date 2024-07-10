@@ -1,5 +1,3 @@
-"use server"
-
 import { CurrentPrice } from "@/types/fugle.t"
 
 const BASE_URL = "https://api.fugle.tw/marketdata/v1.0/stock"

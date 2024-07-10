@@ -73,7 +73,7 @@ export interface Log extends BaseDatabaseType {
   type: (typeof planTypes)[number]
   action: (typeof logTypes)[number]
   target: Target
-  date: string // get time
+  date: Date // get time
   price: number
   quantity: number
   comment?: string
