@@ -19,12 +19,7 @@ export async function getPosition(userId: string): Promise<Asset[]> {
       targetName: row.target_name,
       cost: row.cost,
       entryPrice: row.entry_price,
-      type:
-        row.cost === row.entry_price
-          ? "現股"
-          : row.entry_price / row.cost >= 1.5
-            ? "融資"
-            : "融券",
+      type: row.asset_type,
       quantity: row.quantity,
       entryDate: row.buy_date,
       createdAt: row.created_at,
@@ -35,5 +30,3 @@ export async function getPosition(userId: string): Promise<Asset[]> {
     throw error
   }
 }
-
-

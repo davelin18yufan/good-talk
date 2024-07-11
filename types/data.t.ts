@@ -23,3 +23,5 @@ export interface News {
   imageUrl?: string
   name?: string
 }
+
+

@@ -26,9 +26,7 @@ export async function getStock(symbol: string) {
 }
 
 // Get stock info
-export async function getStockInfo(
-  target: string
-): Promise<{
+export async function getStockInfo(s: string): Promise<{
   market: string
   symbol: string
   name: string
@@ -36,7 +34,7 @@ export async function getStockInfo(
   securityType: string
 }> {
   try {
-    const res = await fetch(`${BASE_URL}/intraday/ticker/${target}`, {
+    const res = await fetch(`${BASE_URL}/intraday/ticker/${s}`, {
       headers,
       next: {
         tags: ["info"],
@@ -49,7 +47,20 @@ export async function getStockInfo(
     return { market, symbol, name, industry, securityType }
   } catch (error) {
     console.error(error)
-    throw new Error(`Get Stock Info ${target} error: ${error}`)
+    throw new Error(`Get Stock Info ${s} error: ${error}`)
+  }
+}
+
+// validate symbol
+export async function validateSymbol(s: string) {
+  try {
+    const { symbol, name } = await getStockInfo(s)
+    if (!symbol) return { isValid: false, message: "代號不存在" }
+
+    return {symbol, name, isValid: true}
+  } catch (error) {
+    console.error(`Get Info ${s} Error: `, error)
+    return { isValid: false, message: error }
   }
 }
 

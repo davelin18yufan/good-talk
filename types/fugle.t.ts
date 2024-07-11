@@ -18,6 +18,7 @@ export interface User extends BaseDatabaseType {
 }
 
 const assetType = ["融資", "融券", "現股"] as const
+export type AssetType = (typeof assetType)[number]
 export interface Asset extends BaseDatabaseType {
   userId: string
   target: string
@@ -26,7 +27,7 @@ export interface Asset extends BaseDatabaseType {
   cost: number
   entryPrice: number
   entryDate: Date
-  type: (typeof assetType)[number]
+  type: AssetType
 }
 
 export interface UnrealizedAsset extends Asset {
@@ -41,22 +42,6 @@ export type Target = {
 const actions = ["建倉", "加碼", "平倉", "出場"] as const
 const planTypes = ["多單", "空單"] as const
 const stopTypes = ["停損", "停利"] as const
-
-export interface Plan extends BaseDatabaseType {
-  type: (typeof planTypes)[number]
-  target: Target
-  action: (typeof actions)[number]
-  entryPrice: number
-  targetPrice: number // 目標價
-  expectation: number // 期望值
-  stop: {
-    type: (typeof stopTypes)[number]
-    price: number
-  }
-  isExecuted: boolean
-  comment?: string
-}
-
 const logTypes = [
   "現股買進",
   "現股賣出",
@@ -68,13 +53,53 @@ const logTypes = [
   "沖賣",
 ] as const
 
+export type ActionType = (typeof actions)[number]
+export type PlanType = (typeof planTypes)[number]
+export type StopType = (typeof stopTypes)[number]
+export type LogType = (typeof logTypes)[number]
+
+export interface Plan extends BaseDatabaseType {
+  type: PlanType
+  target: Target
+  action: ActionType
+  entryPrice: number
+  targetPrice: number
+  expectation: number
+  stop: {
+    type: StopType
+    price: number
+  }
+  isExecuted: boolean
+  comment?: string
+}
+
 export interface Log extends BaseDatabaseType {
   id: string
-  type: (typeof planTypes)[number]
-  action: (typeof logTypes)[number]
+  type: PlanType
+  action: LogType
   target: Target
-  date: Date // get time
+  date: Date
   price: number
   quantity: number
   comment?: string
+}
+
+export type LogForm = Omit<
+  {
+    [K in keyof Log]: K extends "date"
+      ? string
+      : K extends "price" | "quantity"
+        ? string | number
+        : K extends keyof Target
+          ? Target[K]
+          : Log[K]
+  },
+  "id" | "createdAt" | "updatedAt" | "target"
+> & Target
+
+export interface DailySummary extends BaseDatabaseType{
+  userId: string,
+  date: Date,
+  dailyProfitLoss: number
+  change: number
 }
