@@ -21,7 +21,7 @@ export async function getPosition(userId: string): Promise<Asset[]> {
       entryPrice: row.entry_price,
       type: row.asset_type,
       quantity: row.quantity,
-      entryDate: row.buy_date,
+      entryDate: row.entry_date,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }))
