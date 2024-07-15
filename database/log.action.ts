@@ -1,12 +1,12 @@
 "use server"
 import { validateSymbol } from "@/actions/fugle"
 import { AssetType, Log } from "@/types/fugle.t"
-import { sql, db } from "@vercel/postgres"
+import { sql, db, VercelPoolClient } from "@vercel/postgres"
 import { LogForm, PlanType, LogType } from "@/types/fugle.t"
 import {
-  calculateCost,
   calculateProfitLoss,
   calculateDailyProfitLossChange,
+  calculateActualCost,
 } from "@/utils/data"
 
 // *Get all logs
@@ -35,9 +35,10 @@ export async function getTradeLogs(
     date: row.date,
     price: row.price,
     quantity: row.quantity,
+    fee: row.fee,
     comment: row.comment,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }))
 }
 
@@ -73,11 +74,11 @@ export async function addLog(formData: FormData, userId: string) {
     symbol: formData.get("symbol") as string,
     date: formData.get("date") as string,
     price: formData.get("price") as string,
+    fee: formData.get("fee") as string,
     quantity: formData.get("quantity") as string,
     comment: formData.get("comment") as string,
   }
-  const { type, action, symbol, name, date, price, quantity, comment } = logForm
-  const assetType = action.slice(0, 2) as AssetType
+  const { action, symbol, name, date, price, quantity } = logForm
 
   // Step 1: Check symbol validity using getStockInfo
   const {
@@ -116,108 +117,68 @@ export async function addLog(formData: FormData, userId: string) {
     }
 
     // Step 4: Insert log into logs table
-    await client.sql`
-      INSERT INTO logs (user_id, log_type, action, target_id, date, price, quantity, comment)
-      VALUES (${userId}, ${type}, ${action}, ${targetId}, ${date}, ${price}, ${quantity}, ${comment || null})
-    `
-
+    await insertLog(client, userId, logForm, targetId)
+    
     // Step 5: Update assets based on action type
-    const { rows: assetRows, rowCount: existingAssetRowsCount } =
-      await client.sql`SELECT * FROM assets WHERE target_id = ${targetId} AND user_id=${userId} AND asset_type=${assetType}`
-    const existingAsset = assetRows[0]
-
     if (
       action === "現股買進" ||
       action === "融資買進" ||
       action === "融券賣出"
     ) {
-      // Condition has to add new asset or update
-      if (existingAssetRowsCount === 0) {
-        // TODO:要計算融資的成本
-        await client.sql`
-          INSERT INTO assets (user_id, target_id, quantity, entry_price, buy_date, cost, asset_type)
-          VALUES (${userId}, ${targetId}, ${Number(quantity)}, ${Number(price)}, ${date}, ${calculateCost(action, Number(price))}, ${assetType}) 
-        `
-      } else {
-        const newQuantity = existingAsset.quantity + Number(quantity)
-        const newCost =
-          (existingAsset.cost + calculateCost(action, Number(price))) /
-          newQuantity
-        const newPrice =
-          (existingAsset.entry_price + Number(price)) / newQuantity
-
-        await client.sql`
-          UPDATE assets
-          SET quantity=${newQuantity}, cost=${newCost}, entry_price=${newPrice}
-          WHERE target_id=${targetId} AND user_id=${userId} AND asset_type=${assetType}
-        `
-      }
+      // Condition has to add new asset
+      // leverage cost depends on user input
+      await handleBuyAction(client, userId, targetId, logForm)
     } else if (
       action === "現股賣出" ||
       action === "融資賣出" ||
       action === "融券買進"
     ) {
-      if (existingAsset.quantity < quantity)
-        throw new Error(`${targetNameValid} 沖銷的數量大於庫存數量`)
-      if (existingAssetRowsCount === 0 || !existingAssetRowsCount)
-        throw new Error(`無 ${targetNameValid} 此庫存`)
+      await handleSellAction(client, userId, targetId, logForm)
+    } else {
+      // 沖買 || 沖賣
+      const oppositeAction = action === "沖買" ? "沖賣" : "沖買"
 
-      // TODO:要計算先進先出，先扣掉清倉再去計算平均成本
-      // 從記錄裡找出最前面的比數的成本出來計算
-      const { rows: assetRows } = await client.sql`
-        UPDATE assets
-        SET quantity = quantity - ${quantity}
-        WHERE target_id = ${targetId} AND user_id=${userId} AND asset_type=${assetType}
-        RETURNING id, quantity, entry_price`
-      const updatedAsset = assetRows[0]
-
-      const profitLoss = calculateProfitLoss(
-        updatedAsset.entry_price,
-        Number(price),
-        Number(quantity)
-      )
-
-      // Condition has to eliminate asset
-      if (updatedAsset.quantity === 0) {
+      // Query opposite logs 查找可以沖銷的對向記錄
+      const { rows: oppositeRows, rowCount: oppositeRowsCount } =
         await client.sql`
-          DELETE FROM assets
-          WHERE id = ${updatedAsset.id} AND user_id=${userId} AND asset_type=${assetType}
-        `
+        SELECT id, price, quantity, date
+        FROM logs
+        WHERE user_id = ${userId} 
+        AND target_id = ${targetId} 
+        AND action = ${oppositeAction}
+        AND DATE(date) = DATE(${date}) -- psql只比較日期，忽略時間
+        ORDER BY date ASC
+      `
+      if (oppositeRowsCount === 0) {
+        await client.query("COMMIT")
+        return
       }
 
-      // Step 6: Update daily summary
-      // query user capital -> get previous profit -> calc change
-      const { rows: userRows } = await client.sql`
-        SELECT available_capital FROM users WHERE id = ${userId}`
-      const capital = userRows[0].available_capital
-      const { rows: prevSummaryRows, rowCount: PrevSummaryRowCount } =
-        await client.sql`
-          SELECT daily_profit_loss
-          FROM daily_summary
-          WHERE user_id = ${userId}
-          ORDER BY date DESC
-          LIMIT 1
-        `
+      // Calculate profit
+      let profitLoss: number
+      let quantityToClose = Number(quantity)
+      let totalProfitLoss = 0
+      let closedQuantity = 0
 
-      if (PrevSummaryRowCount === 0) {
-        const newChange = calculateDailyProfitLossChange(capital, 0, profitLoss)
-        await client.sql`
-          INSERT INTO daily_summary (user_id, date, daily_profit_loss, change)
-          VALUES (${userId}, ${date}, ${profitLoss}, ${newChange})
-        `
-      } else {
-        const previousTotalProfitLoss = prevSummaryRows[0]?.daily_profit_loss
+      for (const oppositeLog of oppositeRows) {
+        if (quantityToClose <= 0) break
 
-        const newChange = calculateDailyProfitLossChange(
-          capital,
-          previousTotalProfitLoss,
-          profitLoss
+        const availableQuantity = oppositeLog.quantity
+        const actualClosedQuantity = Math.min(
+          quantityToClose,
+          availableQuantity
         )
-        await client.sql`
-            UPDATE daily_summary
-            SET daily_profit_loss = daily_profit_loss + ${profitLoss}, change = ${newChange}
-            WHERE user_id = ${userId} AND date = ${date}
-          `
+        profitLoss =
+          (Number(price) - oppositeLog.entry_price) * actualClosedQuantity
+        totalProfitLoss += profitLoss
+        quantityToClose -= actualClosedQuantity
+        closedQuantity += actualClosedQuantity
+      }
+      // TODO:李用closedQuantity來檢查當日是否有未沖銷紀錄
+
+      // update daily_summary and capital
+      if (totalProfitLoss !== 0) {
+        await updateDailySummary(client, userId, date, totalProfitLoss)
       }
     }
 
@@ -235,130 +196,203 @@ export async function addLog(formData: FormData, userId: string) {
 }
 
 /**
- * Deletes a trade log from the database.
+ * Insert log into database using Vercel Client API which requires configure connection at first.
  *
- * @param {string} logId - The ID of the log entry to delete.
- * @param {string} userId - The ID of the user who owns the log entry.
- * @throws Will throw an error if the transaction fails.
- * 
- * update daily_summary, plus or minus profit back, reset date to last transaction date.
+ * @param client - VercelPoolClient
+ * @param userId - Current user id
+ * @param logForm - FormData sent by user.
+ * @param targetId - The commodity of transaction.
  */
-export async function deleteLog(logId: string, userId: string) {
-  const client = await db.connect()
+async function insertLog(
+  client: VercelPoolClient,
+  userId: string,
+  logForm: LogForm,
+  targetId: string | number
+) {
+  const { type, action, date, price, quantity, fee, comment } = logForm
+  await client.sql`
+    INSERT INTO logs (user_id, log_type, action, target_id, date, price, quantity, fee, comment)
+    VALUES (${userId}, ${type}, ${action}, ${targetId}, ${date}, ${price}, ${quantity}, ${fee}, ${comment || null})
+  `
+}
 
-  try {
-    // Step 1: Start transaction
-    await client.query("BEGIN")
+/**
+ * Buying action which might increase assets in @constant assetType
+ *
+ * @param client - VercelPoolClient
+ * @param userId - Current user id
+ * @param targetId - The commodity of transaction.
+ * @param logForm - FormData sent by user.
+ */
+async function handleBuyAction(
+  client: VercelPoolClient,
+  userId: string,
+  targetId: string | number,
+  logForm: LogForm
+) {
+  const { quantity, price, fee, action, date } = logForm
+  const actualCost = calculateActualCost(
+    Number(price),
+    Number(quantity),
+    Number(fee),
+    action
+  )
+   
+  const assetType = action.slice(0, 2) as AssetType
+  await client.sql`
+    INSERT INTO assets (user_id, target_id, quantity, entry_price, entry_date, cost, asset_type)
+    VALUES (${userId}, ${targetId}, ${Number(quantity)}, ${Number(price)}, ${date}, ${Number(actualCost) || Number(price)}, ${assetType}) 
+  `
+}
 
-    // Step 2: Retrieve log entry to get details
-    const { rows: logRows } = await client.sql`
-      SELECT action, target_id, price, quantity
-      FROM logs
-      WHERE id = ${logId} AND user_id = ${userId}
-    `
-    const log = logRows[0]
-    if (!log) {
-      throw new Error("Log entry not found")
-    }
-    const { action, target_id: targetId, price, quantity } = log
+/**
+ * Seeling action which will decrease assets and update daily_summary.
+ *
+ * @param client - VercelPoolClient
+ * @param userId - Current user id
+ * @param targetId - The commodity of transaction.
+ * @param logForm - FormData sent by user.
+ */
+async function handleSellAction(
+  client: VercelPoolClient,
+  userId: string,
+  targetId: string | number,
+  logForm: LogForm
+) {
+  const { quantity, fee, action, date, price } = logForm
+  const actualCost = calculateActualCost(
+    Number(price),
+    Number(quantity),
+    Number(fee),
+    action
+  )
+  const assetType = action.slice(0, 2) as AssetType
 
-    // Step 3: Delete log entry
-    await client.sql`
-      DELETE FROM logs
-      WHERE id = ${logId} AND user_id = ${userId}
-    `
+  // get current assets order by entry_date
+  const { rows: existingAsset } = await client.sql`
+    SELECT assets.id, assets.quantity, assets.cost, assets.entry_date, targets.name AS target_name
+    FROM assets
+    LEFT JOIN targets 
+    ON assets.target_id = ${targetId} 
+    WHERE user_id = ${userId} AND target_id = ${targetId} AND asset_type = ${assetType}
+    ORDER BY entry_date ASC
+  `
 
-    // Step 4: Update assets based on action type
-    let profitLoss = 0
-    const { rows: assetRows, rowCount: assetRowsCount } =
-      await client.sql`SELECT * FROM assets WHERE target_id = ${targetId} AND user_id=${userId}`
-    const existingAsset = assetRows[0]
+  if (existingAsset.length === 0)
+    throw new Error(`無此 ${existingAsset[0].target_name} 庫存`)
 
-    if (assetRowsCount && assetRowsCount > 0) {
-      let newQuantity = existingAsset.quantity
-      let newCost = existingAsset.cost
-      let newPrice = existingAsset.entry_price
+  const inventory = existingAsset.map((row) => ({
+    id: row.id,
+    actualCost: row.cost,
+    quantity: row.quantity,
+    date: row.entry_date,
+  }))
 
-      if (
-        action === "現股買進" ||
-        action === "融資買進" ||
-        action === "融券賣出"
-      ) {
-        newQuantity -= Number(quantity)
-        if (newQuantity > 0) {
-          newCost =
-            (existingAsset.cost * existingAsset.quantity -
-              Number(price) * Number(quantity)) /
-            newQuantity
-          newPrice =
-            (existingAsset.entry_price * existingAsset.quantity -
-              Number(price) * Number(quantity)) /
-            newQuantity
-        } else {
-          newCost = 0
-          newPrice = 0
-        }
-      } else if (
-        action === "現股賣出" ||
-        action === "融資賣出" ||
-        action === "融券買進"
-      ) {
-        newQuantity += Number(quantity)
-        newCost =
-          (existingAsset.cost * existingAsset.quantity +
-            Number(price) * Number(quantity)) /
-          newQuantity
-        newPrice =
-          (existingAsset.entryPrice * existingAsset.quantity +
-            Number(price) * Number(quantity)) /
-          newQuantity
-        profitLoss = calculateProfitLoss(
-          existingAsset.entryPrice,
-          Number(price),
-          Number(quantity)
-        )
-      }
+  const totalAssetQuantity = inventory.reduce(
+    (acc, cur) => acc + cur.quantity,
+    0
+  )
+  if (totalAssetQuantity < Number(quantity))
+    throw new Error(`${existingAsset[0].target_name} 沖銷的數量大於庫存數量`)
 
-      if (newQuantity > 0) {
-        await client.sql`
-          UPDATE assets
-          SET quantity=${newQuantity}, cost=${newCost}, entry_price=${newPrice}
-          WHERE target_id=${targetId} AND user_id=${userId}
-        `
-      } else {
-        await client.sql`
-          DELETE FROM assets
-          WHERE target_id=${targetId} AND user_id=${userId}
-        `
-      }
-      // Step 5: Update daily summary
+  // calculate profit
+  const { totalProfit } = calculateProfitLoss(
+    inventory,
+    actualCost,
+    Number(quantity)
+  )
+
+  // update assets
+  let remainingSellQuantity = Number(quantity)
+  for (const asset of inventory) {
+    if (remainingSellQuantity === 0) break
+
+    const quantityToSell = Math.min(asset.quantity, remainingSellQuantity)
+
+    if (quantityToSell === asset.quantity) {
       await client.sql`
-        UPDATE daily_summary
-        SET daily_profit_loss = daily_profit_loss - ${profitLoss},
-            change = change - ${profitLoss},
-            date = COALESCE(
-              (SELECT date
-              FROM logs
-              WHERE user_id = ${userId} 
-              AND (action = '現股賣出' OR action = '融資賣出' OR action = '融券買進')
-              ORDER BY date DESC
-              LIMIT 1),
-              date  
-            )
-        WHERE user_id = ${userId}
+        DELETE FROM assets
+        WHERE id = ${asset.id}
+      `
+    } else {
+      const newQuantity = asset.quantity - quantityToSell
+      const newCost = asset.actualCost * (newQuantity / asset.quantity)
+      await client.sql`
+        UPDATE assets
+        SET quantity = ${newQuantity}, cost = ${newCost}
+        WHERE id = ${asset.id}
       `
     }
 
-
-    // Commit transaction
-    await client.query("COMMIT")
-  } catch (error) {
-    // Rollback transaction in case of error
-    await client.query("ROLLBACK")
-    console.error("Delete Log Error: ", error)
-    throw error
-  } finally {
-    // Release the client
-    client.release()
+    remainingSellQuantity -= quantityToSell
   }
+
+  // Update daily summary and capital
+  await updateDailySummary(client, userId, date, totalProfit)
+}
+
+/**
+ * Update daily_summary based on userId and date.
+ *
+ * @param client - VercelPoolClient
+ * @param userId - Current user id.
+ * @param date - The date transaction happened and will update profit.
+ * @param profitLoss - The outcome of transaction.
+ */
+async function updateDailySummary(
+  client: VercelPoolClient,
+  userId: string,
+  date: string,
+  profitLoss: number
+) {
+  const {
+    rows: [{ available_capital: capital }],
+  } = await client.sql`
+    SELECT available_capital FROM users WHERE id = ${userId}
+  `
+
+  const { rows: existingSummary } = await client.sql`
+    SELECT daily_profit_loss
+    FROM daily_summary
+    WHERE user_id = ${userId} AND date = ${date}
+  `
+
+  let previousTotalProfitLoss = 0
+  // if there is previous summary
+  if (existingSummary.length > 0) {
+    previousTotalProfitLoss = existingSummary[0].daily_profit_loss
+    const newProfitLoss = Number(previousTotalProfitLoss) + profitLoss
+    const newChange = calculateDailyProfitLossChange(
+      Number(capital),
+      Number(previousTotalProfitLoss),
+      newProfitLoss
+    )
+
+    await client.sql`
+      UPDATE daily_summary
+      SET daily_profit_loss = ${newProfitLoss}, change = ${newChange}
+      WHERE user_id = ${userId} AND date = ${date}
+    `
+  } else {
+    const { rows: prevSummaryRows } = await client.sql`
+      SELECT daily_profit_loss
+      FROM daily_summary
+      WHERE user_id = ${userId}
+      ORDER BY date DESC
+      LIMIT 1
+    `
+    previousTotalProfitLoss = prevSummaryRows[0]?.daily_profit_loss || 0
+    const newChange = calculateDailyProfitLossChange(
+      Number(capital),
+      Number(previousTotalProfitLoss),
+      profitLoss
+    )
+    await client.sql`
+      INSERT INTO daily_summary (user_id, date, daily_profit_loss, change)
+      VALUES (${userId}, ${date}, ${profitLoss}, ${newChange})
+    `
+  }
+
+  // update user current capital
+  await client.sql`UPDATE users SET current_capital = current_capital + ${profitLoss} WHERE id = ${userId}`
 }

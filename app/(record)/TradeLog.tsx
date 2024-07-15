@@ -6,7 +6,7 @@ import { useDate } from "@/store/date"
 import { Log as LogType } from "@/types/fugle.t"
 import { Badge, badgeVariants } from "@/components/ui/badge"
 import TooltipCard from "@/components/TooltipCard"
-import { getTradeLogs } from "@/database/log.action"
+import { addLog, getTradeLogs } from "@/database/log.action"
 
 function Log({ log }: { log: LogType }) {
   return (
@@ -101,6 +101,19 @@ function AllLogs({ logs }: { logs: LogType[] }) {
 const TradeLog = async ({ className }: { className?: string }) => {
   // const { selectedDate } = useDate((store) => store.selectedDate)
   const logs = await getTradeLogs("1", "2023-07-04")
+
+  const formData = new FormData()
+  formData.append("type", "多單")
+  formData.append("action", "現股賣出")
+  formData.append("symbol", "2330")
+  formData.append("name", "台積電")
+  formData.append("date", new Date().toISOString())
+  formData.append("price", "1025")
+  formData.append("fee", "200")
+  formData.append("quantity", "300")
+  formData.append("comment", "")
+
+  await addLog(formData, "1")
 
   return (
     <div className={cn("section p-4", className)}>

@@ -14,17 +14,20 @@ export interface User extends BaseDatabaseType {
   username: string
   email: string
   availableCapital: number // 總可用投入資金
+  currentCapital:number
+  minFee: number
+  feeDiscount: number
   leverage: boolean // 是否使用融資
 }
 
-const assetType = ["融資", "融券", "現股"] as const
+const assetType = ["融資", "融券", "現股", "ETF"] as const
 export type AssetType = (typeof assetType)[number]
 export interface Asset extends BaseDatabaseType {
   userId: string
   target: string
   targetName: string
   quantity: number
-  cost: number
+  cost: number // actual cost
   entryPrice: number
   entryDate: Date
   type: AssetType
@@ -80,6 +83,7 @@ export interface Log extends BaseDatabaseType {
   target: Target
   date: Date
   price: number
+  fee: number
   quantity: number
   comment?: string
 }
@@ -88,7 +92,7 @@ export type LogForm = Omit<
   {
     [K in keyof Log]: K extends "date"
       ? string
-      : K extends "price" | "quantity"
+      : K extends "price" | "quantity" | "fee" | "profitLoss"
         ? string | number
         : K extends keyof Target
           ? Target[K]

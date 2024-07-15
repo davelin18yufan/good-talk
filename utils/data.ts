@@ -1,6 +1,6 @@
-import { Asset, CurrentPrice, LogType } from "@/types/fugle.t"
+import { Asset, AssetType, CurrentPrice, LogType } from "@/types/fugle.t"
 
-// Postion profit 計算持股損益
+// Position profit 計算持股損益
 export const calculateProfit = (
   asset: Asset,
   currentPrices: CurrentPrice[]
@@ -33,34 +33,54 @@ export const calculateTotalActualInvestmentCost = (assets: Asset[]): number => {
 }
 
 /**
- * Calculates the cost based on leverage type.
- * @param {LogType} action - The type of executed transaction.
- * @param {number} cost - The price of transaction dealt.
- * @returns {number} The cost after leveraged.
- */
-export function calculateCost(action: LogType, cost: number): number {
-  if (action === "融資買進") {
-    return cost * 0.4
-  }
-  if (action === "融券賣出") {
-    return cost * 0.9
-  }
-  return cost
-}
-
-/**
- * Calculates the profit or loss for a given transaction.
- * @param {number} entryPrice - The price at which the stock was bought.
- * @param {number} exitPrice - The price at which the stock was sold.
- * @param {number} quantity - The quantity of stock bought or sold.
- * @returns {number} The profit or loss for the transaction.
+ * 計算股票交易的每股實際成本和總獲利
+ *
+ * @param {Array<{ actualCost: number, quantity: number }>} inventory - 當前庫存(依照時間ASC排列)
+ * @param {number} sellActualCost - 賣出實際成本（包含手續費）
+ * @param {number} sellQuantity - 賣出數量
+ * @returns {object} 包含每股實際成本、每股實際收入、每股利潤和總獲利的對象
  */
 export function calculateProfitLoss(
-  entryPrice: number,
-  exitPrice: number,
-  quantity: number
-): number {
-  return (exitPrice - entryPrice) * quantity
+  inventory: Array<{ actualCost: number, quantity: number }>,
+  sellActualCost: number,
+  sellQuantity: number
+) {
+  let remainingSellQuantity = sellQuantity;
+  let totalBuyActualCost = 0;
+  let totalQuantity = 0;
+
+  // 遍歷庫存並根據先進先出原則計算買入實際成本
+  for (const stock of inventory) {
+    if (remainingSellQuantity === 0) break;
+
+    const quantityToUse = Math.min(stock.quantity, remainingSellQuantity);
+    totalBuyActualCost += (stock.actualCost / stock.quantity) * quantityToUse;
+    totalQuantity += quantityToUse;
+    remainingSellQuantity -= quantityToUse;
+  }
+
+  if (remainingSellQuantity > 0) {
+    throw new Error("庫存不足以賣出指定數量");
+  }
+
+  // 計算買入每股實際成本
+  const buyActualCostPerShare = totalBuyActualCost / totalQuantity;
+
+  // 計算賣出每股實際收入
+  const sellActualCostPerShare = sellActualCost / sellQuantity;
+
+  // 計算每股利潤
+  const profitPerShare = sellActualCostPerShare - buyActualCostPerShare;
+
+  // 計算總獲利
+  const totalProfit = profitPerShare * sellQuantity;
+
+  return {
+    buyActualCostPerShare,
+    sellActualCostPerShare,
+    profitPerShare,
+    totalProfit,
+  };
 }
 
 /**
@@ -78,11 +98,82 @@ export function calculateDailyProfitLossChange(
   todayProfitLoss: number
 ): number {
   const previousTotalAsset = initialCapital + previousTotalProfitLoss
-
   const todayTotalAsset = previousTotalAsset + todayProfitLoss
 
   const changePercentage =
     (todayTotalAsset - previousTotalAsset) / previousTotalAsset
 
-  return Math.round(changePercentage * 10000) / 10000
+  return parseFloat((changePercentage * 100).toFixed(2))
+}
+
+type TradeType = AssetType | "沖買" | "沖賣"
+/**
+ * 計算股票交易的手續費和證券交易稅，賣出時統一扣除
+ * 等於手續費*2+證交稅
+ *
+ * @param {number} transactionAmount - 交易金額
+ * @param {number} feeDiscount - 手續費折扣（例如：0.8 表示 80% 的折扣）
+ * @param {number} minimumFee - 最低手續費
+ * @param {TradeType} tradeType - 交易類型（'normal': 一般交易, 'dayTrade': 當沖交易, 'ETF': ETF交易）
+ * @returns {number} 手續費和證券交易稅的總和（新台幣，四捨五入到整數）
+ */
+export function calculateFee(
+  transactionAmount: number,
+  feeDiscount: number,
+  minimumFee: number,
+  tradeType: TradeType
+): number {
+  const standardFeeRate = 0.1425 / 100
+
+  /**
+   * 根據交易類型計算證券交易稅稅率
+   * @returns {number} 證券交易稅稅率
+   */
+  const securitiesTransactionTaxRate = (): number => {
+    switch (tradeType) {
+      case "沖買":
+        return 0.15 / 100
+      case "沖賣":
+        return 0.15 / 100 // 當沖交易稅率為0.15%
+      case "ETF":
+        return 0.1 / 100 // ETF交易稅率為0.1%
+      default:
+        return 0.3 / 100 // 一般交易稅率為0.3%
+    }
+  }
+
+  const originalFee = transactionAmount * standardFeeRate * feeDiscount
+
+  const actualFee = Math.round(
+    originalFee < minimumFee ? minimumFee : originalFee
+  )
+
+  const securitiesTransactionTax = Math.round(
+    transactionAmount * securitiesTransactionTaxRate()
+  )
+
+  return actualFee + securitiesTransactionTax
+}
+
+/**
+ * Calculate actual cost by integrating amount and fee
+ * 
+ * @param {number} price - Target entry_price
+ * @param {number} quantity - Transaction quantity
+ * @param {number} fee - Tax + fee
+ * @param {LogType} action - Based on assetType
+ * @returns {number}
+ */
+export function calculateActualCost(
+  price: number,
+  quantity: number,
+  fee: number,
+  action: LogType
+): number {
+  const totalPrice = price * quantity
+  if (action.includes("買") || action === "融券賣出") {
+    return totalPrice + fee
+  } else {
+    return totalPrice - fee
+  }
 }
