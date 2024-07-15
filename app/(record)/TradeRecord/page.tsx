@@ -32,27 +32,43 @@ const user: User = {
 
 export default async function TradeRecord() {
   // TODO:Fetch User
-  // *Get positions 庫存
+  /**
+   * Get positions 庫存
+   */
   const assets = await getPosition("1")
 
-  // *Get current position market price 庫存現價
+  /**
+   * Current position symbols array
+   */
   const symbols = assets?.map((item) => item.target)
+  /**
+   * Get current position market price 庫存現價
+   */
   const currentPrices = await getPositionCurrentPrices(symbols)
 
-  // *Total market value 庫存總市值
+  /**
+   * Total market value 庫存總市值
+   */
   const totalMarketValue = calculateTotalMarketValue(assets, currentPrices)
 
-  // *Unrealized profit 庫存損益
+  /**
+   * Unrealized profit 庫存損益
+   */
   const unrealizedAssets = assets.map((a) => ({
     ...a,
     profit: calculateProfit(a, currentPrices),
   }))
 
-  // *totalInvestmentCost = Total assets cost(For calculating profit) 持有商品的入手成本(計算損益)
+  /**
+   * totalInvestmentCost = Total assets cost(For calculating profit) 持有商品的入手成本(計算損益)
+   */
   const totalInvestmentCost = calculateTotalInvestmentCost(assets)
 
-  // *totalActualInvestCost = actual spending cost of holding assets.(leverage counted, for calculating capitalRatio)
-  // *實際總投入成本（包含槓桿,計算資金水位用）
+  /** 
+   * Actual spending cost of holding assets.(leverage counted, for calculating capitalRatio)
+   *
+   * 實際總投入成本（包含槓桿,計算資金水位用）
+   */
   const totalActualInvestmentCost = calculateTotalActualInvestmentCost(assets)
 
   return (

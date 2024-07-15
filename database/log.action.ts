@@ -247,6 +247,8 @@ async function handleBuyAction(
 
 /**
  * Seeling action which will decrease assets and update daily_summary.
+ * 
+ * *Following FIFO principle.
  *
  * @param client - VercelPoolClient
  * @param userId - Current user id
