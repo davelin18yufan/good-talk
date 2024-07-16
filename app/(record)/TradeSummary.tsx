@@ -58,7 +58,7 @@ const TradeSummary = ({
                   key={a.target}
                 >
                   <TableCell>{a.target}</TableCell>
-                  <TableCell>{a.targetName}</TableCell>
+                  <TableCell>{a.targetName}({a.type})</TableCell>
                   <TableCell>{a.entryPrice}</TableCell>
                   <TableCell>
                     {marketPrice

@@ -1,6 +1,8 @@
 import { Asset, AssetType, CurrentPrice, LogType } from "@/types/fugle.t"
 
-// Position profit 計算持股損益
+/**
+ *  Position profit 計算持股損益
+ */
 export const calculateProfit = (
   asset: Asset,
   currentPrices: CurrentPrice[]
@@ -10,7 +12,9 @@ export const calculateProfit = (
   return marketValue ? quantity * (marketValue.closePrice - entryPrice) : 0
 }
 
-// Position market value 計算總市值
+/**
+ * Position market value 計算總市值
+ */
 export const calculateTotalMarketValue = (
   assets: Asset[],
   currentPrices: CurrentPrice[]
@@ -22,14 +26,11 @@ export const calculateTotalMarketValue = (
   }, 0)
 }
 
-// Position invest cost 計算總投資成本
-export const calculateTotalInvestmentCost = (assets: Asset[]): number => {
-  return assets.reduce((acc, cur) => acc + cur.cost * cur.quantity, 0)
-}
-
-// Position actual invest cost 計算實際總投入成本
+/**
+ *  Position actual invest cost 計算實際總投入成本
+ */
 export const calculateTotalActualInvestmentCost = (assets: Asset[]): number => {
-  return assets.reduce((acc, cur) => cur.cost * cur.quantity + acc, 0)
+  return assets.reduce((acc, cur) => cur.cost + acc, 0)
 }
 
 /**
@@ -41,46 +42,46 @@ export const calculateTotalActualInvestmentCost = (assets: Asset[]): number => {
  * @returns {object} 包含每股實際成本、每股實際收入、每股利潤和總獲利的對象
  */
 export function calculateProfitLoss(
-  inventory: Array<{ actualCost: number, quantity: number }>,
+  inventory: Array<{ actualCost: number; quantity: number }>,
   sellActualCost: number,
   sellQuantity: number
 ) {
-  let remainingSellQuantity = sellQuantity;
-  let totalBuyActualCost = 0;
-  let totalQuantity = 0;
+  let remainingSellQuantity = sellQuantity
+  let totalBuyActualCost = 0
+  let totalQuantity = 0
 
   // 遍歷庫存並根據先進先出原則計算買入實際成本
   for (const stock of inventory) {
-    if (remainingSellQuantity === 0) break;
+    if (remainingSellQuantity === 0) break
 
-    const quantityToUse = Math.min(stock.quantity, remainingSellQuantity);
-    totalBuyActualCost += (stock.actualCost / stock.quantity) * quantityToUse;
-    totalQuantity += quantityToUse;
-    remainingSellQuantity -= quantityToUse;
+    const quantityToUse = Math.min(stock.quantity, remainingSellQuantity)
+    totalBuyActualCost += (stock.actualCost / stock.quantity) * quantityToUse
+    totalQuantity += quantityToUse
+    remainingSellQuantity -= quantityToUse
   }
 
   if (remainingSellQuantity > 0) {
-    throw new Error("庫存不足以賣出指定數量");
+    throw new Error("庫存不足以賣出指定數量")
   }
 
   // 計算買入每股實際成本
-  const buyActualCostPerShare = totalBuyActualCost / totalQuantity;
+  const buyActualCostPerShare = totalBuyActualCost / totalQuantity
 
   // 計算賣出每股實際收入
-  const sellActualCostPerShare = sellActualCost / sellQuantity;
+  const sellActualCostPerShare = sellActualCost / sellQuantity
 
   // 計算每股利潤
-  const profitPerShare = sellActualCostPerShare - buyActualCostPerShare;
+  const profitPerShare = sellActualCostPerShare - buyActualCostPerShare
 
   // 計算總獲利
-  const totalProfit = profitPerShare * sellQuantity;
+  const totalProfit = profitPerShare * sellQuantity
 
   return {
     buyActualCostPerShare,
     sellActualCostPerShare,
     profitPerShare,
     totalProfit,
-  };
+  }
 }
 
 /**
@@ -157,7 +158,7 @@ export function calculateFee(
 
 /**
  * Calculate actual cost by integrating amount and fee
- * 
+ *
  * @param {number} price - Target entry_price
  * @param {number} quantity - Transaction quantity
  * @param {number} fee - Tax + fee

@@ -98,13 +98,13 @@ function AllLogs({ logs }: { logs: LogType[] }) {
   )
 }
 
-const TradeLog = async ({ className }: { className?: string }) => {
+const TradeLog = async ({ layout }: { layout?: string }) => {
   // const { selectedDate } = useDate((store) => store.selectedDate)
   const logs = await getTradeLogs("1", "2023-07-04")
 
   // const formData = new FormData()
   // formData.append("type", "多單")
-  // formData.append("action", "現股賣出")
+  // formData.append("action", "現股買進")
   // formData.append("symbol", "2330")
   // formData.append("name", "台積電")
   // formData.append("date", new Date().toISOString())
@@ -116,7 +116,7 @@ const TradeLog = async ({ className }: { className?: string }) => {
   // await addLog(formData, "1")
 
   return (
-    <div className={cn("section p-4", className)}>
+    <div className={cn("section p-4", layout)}>
       <SectionTitle title="交易紀錄" formType="log" />
       <AllLogs logs={logs} />
     </div>

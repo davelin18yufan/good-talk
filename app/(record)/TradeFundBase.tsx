@@ -20,14 +20,12 @@ const getGradientClassForValue = (value: number) => {
 
 export default async function TradeFundBase({
   layout,
-  totalInvestmentCost,
-  availableCapital,
+  currentCapital,
   totalActualInvestmentCost,
   leverageUsed = false,
 }: {
   layout?: string
-  availableCapital: number
-  totalInvestmentCost: number
+  currentCapital: number
   totalActualInvestmentCost: number
   leverageUsed: boolean
 }) {
@@ -38,14 +36,14 @@ export default async function TradeFundBase({
     </div>
   )
 
-  // *CapitalRatio = totalInvestmentCost / availableCapital 資金水位=已使用資本/總可用資金(融資?)
+  // *CapitalRatio = totalInvestmentCost / currentCapital 資金水位=已使用資本/總可用資金(融資?)
   const capitalRatio = leverageUsed
-    ? totalInvestmentCost / availableCapital
-    : totalInvestmentCost / (availableCapital * 2.5)
-  const level = Number(capitalRatio.toPrecision(2)) * 100 // 持股水位
-
-  // *Cash = availableCapital - totalActualInvestmentCost 現金=總可投入資本-總已投入成本
-  const cash = availableCapital - totalActualInvestmentCost
+    ? (totalActualInvestmentCost / (currentCapital * 2.5)).toPrecision(2)
+    : (totalActualInvestmentCost / currentCapital).toPrecision(2)
+  const level = Number(capitalRatio) * 100 // 持股水位
+  
+  // *Cash = currentCapital - totalActualInvestmentCost 現金=總可投入資本-總已投入成本
+  const cash = currentCapital - totalActualInvestmentCost
   const data = [
     { name: "現金水位", value: cash },
     { name: "持倉部位", value: totalActualInvestmentCost },

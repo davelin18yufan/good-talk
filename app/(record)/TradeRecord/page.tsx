@@ -8,35 +8,24 @@ import TradeFundBase from "../TradeFundBase"
 
 import { getPositionCurrentPrices } from "@/actions/fugle"
 import { cn } from "@/utils"
-import { getPosition } from "@/database/asset.action"
+import { getAggregatedPosition } from "@/database/asset.action"
+import { getUserInfo } from "@/database/user.action"
 import { User } from "@/types/fugle.t"
 import {
   calculateTotalMarketValue,
   calculateProfit,
   calculateTotalActualInvestmentCost,
-  calculateTotalInvestmentCost,
 } from "@/utils/data"
 
-const user: User = {
-  id: "1",
-  username: "user1",
-  email: "user1@example.com",
-  availableCapital: 300000,
-  currentCapital: 300000,
-  minFee: 20,
-  feeDiscount: 0.8,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  leverage: true,
-}
 
 export default async function TradeRecord() {
   // TODO:Fetch User
+  const user = await getUserInfo('1')
   /**
    * Get positions 庫存
    */
-  const assets = await getPosition("1")
-
+  const assets = await getAggregatedPosition("1")
+  
   /**
    * Current position symbols array
    */
@@ -58,11 +47,6 @@ export default async function TradeRecord() {
     ...a,
     profit: calculateProfit(a, currentPrices),
   }))
-
-  /**
-   * totalInvestmentCost = Total assets cost(For calculating profit) 持有商品的入手成本(計算損益)
-   */
-  const totalInvestmentCost = calculateTotalInvestmentCost(assets)
 
   /** 
    * Actual spending cost of holding assets.(leverage counted, for calculating capitalRatio)
@@ -92,8 +76,7 @@ export default async function TradeRecord() {
         {/* 資金水位圓餅圖 */}
         <TradeFundBase
           layout="col-span-1 md:col-span-2"
-          availableCapital={user.availableCapital}
-          totalInvestmentCost={totalInvestmentCost}
+          currentCapital={user.currentCapital}
           totalActualInvestmentCost={totalActualInvestmentCost}
           leverageUsed={user.leverage}
         />

@@ -27,7 +27,7 @@ export interface Asset extends BaseDatabaseType {
   target: string
   targetName: string
   quantity: number
-  cost: number // actual cost
+  cost: number // entry_price * quantity + fee
   entryPrice: number
   entryDate: Date
   type: AssetType
