@@ -6,7 +6,7 @@ import RealizedPnLChart from "../RealizedPnLChart"
 import ProfitChart from "../ProfitChart"
 import TradeFundBase from "../TradeFundBase"
 
-import { getPositionCurrentPrices } from "@/actions/fugle"
+import { getNearestTradingDay, getPositionCurrentPrices, getYearToDateReturn } from "@/actions/fugle"
 import { cn } from "@/utils"
 import { getAggregatedPosition } from "@/database/asset.action"
 import { getUserInfo } from "@/database/user.action"

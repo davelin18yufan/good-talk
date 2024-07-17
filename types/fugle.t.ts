@@ -14,7 +14,7 @@ export interface User extends BaseDatabaseType {
   username: string
   email: string
   availableCapital: number // 總可用投入資金
-  currentCapital:number
+  currentCapital: number
   minFee: number
   feeDiscount: number
   leverage: boolean // 是否使用融資
@@ -99,11 +99,25 @@ export type LogForm = Omit<
           : Log[K]
   },
   "id" | "createdAt" | "updatedAt" | "target"
-> & Target
+> &
+  Target
 
-export interface DailySummary extends BaseDatabaseType{
-  userId: string,
-  date: Date,
+export interface DailySummary extends BaseDatabaseType {
+  userId: string
+  date: Date
   dailyProfitLoss: number
   change: number
+}
+
+export const indexSymbol = {
+  TXSE: 'IX0001',
+  '0050': '0050'
+} as const
+export type IndexSymbol = (typeof indexSymbol)
+
+export interface MarketSummary {
+  symbol: string,
+  date: Date,
+  closePrice: number,
+  yearToDateReturn: number
 }

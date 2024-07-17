@@ -39,7 +39,7 @@ export const calculateTotalActualInvestmentCost = (assets: Asset[]): number => {
  * @param {Array<{ actualCost: number, quantity: number }>} inventory - 當前庫存(依照時間ASC排列)
  * @param {number} sellActualCost - 賣出實際成本（包含手續費）
  * @param {number} sellQuantity - 賣出數量
- * @returns {object} 包含每股實際成本、每股實際收入、每股利潤和總獲利的對象
+ * @returns 包含每股實際成本、每股實際收入、每股利潤和總獲利的對象
  */
 export function calculateProfitLoss(
   inventory: Array<{ actualCost: number; quantity: number }>,
@@ -177,4 +177,11 @@ export function calculateActualCost(
   } else {
     return totalPrice - fee
   }
+}
+
+/**
+ * Calculate return percentage
+ */
+export function calculateReturnPercentage(startPrice: number, endPrice: number): number {
+  return ((endPrice - startPrice) / startPrice) * 100
 }
