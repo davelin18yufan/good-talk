@@ -78,28 +78,3 @@ export async function getAggregatedPosition(userId: string): Promise<Asset[]> {
   return parsePosition(assets)
 }
 
-export async function getMarketSummary(symbol: string){
-  return sql`SELECT * FROM market_summary WHERE symbol=${symbol}`
-}
-
-export async function updateMarketSummary(
-  symbol: string = "IX0001",
-  date: string
-) {
-  const nearestTradeDate = await getNearestTradingDay(symbol, date)
-  const { data } = await getHistoricalPrice(
-    symbol,
-    { from: nearestTradeDate, to: nearestTradeDate },
-    ["close"]
-  )
-  const yearToDateReturn = await getYearToDateReturn('IX0001')
-  const {close} = data[0]
-
-  await sql`
-    INSERT INTO market_summary (symbol, date, close_price, year_to_date_return)
-    VALUES (${symbol}, ${date}, ${close}, ${yearToDateReturn})
-    ON CONFLICT (symbol) DO UPDATE
-    SET close_price = EXCLUDED.close_price,
-        date = EXCLUDED.date,
-        year_to_date_return = EXCLUDED.year_to_date_return;`
-}

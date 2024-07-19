@@ -104,20 +104,35 @@ export type LogForm = Omit<
 
 export interface DailySummary extends BaseDatabaseType {
   userId: string
-  date: Date
+  date: Date // update date
   dailyProfitLoss: number
   change: number
 }
 
-export const indexSymbol = {
-  TXSE: 'IX0001',
-  '0050': '0050'
-} as const
-export type IndexSymbol = (typeof indexSymbol)
+export interface MonthlySummary extends BaseDatabaseType {
+  userId: string
+  year: number
+  month: number
+  monthlyProfitLoss: number
+  change: number
+}
 
-export interface MarketSummary {
-  symbol: string,
-  date: Date,
-  closePrice: number,
+export interface UserMonthlyPerformance {
+  month: string
+  profitLoss: number
+  returnRate: number
+}
+
+export const indexSymbol = {
+  TXSE: "IX0001",
+  "0050": "0050",
+} as const
+export type IndexSymbol = typeof indexSymbol
+
+export interface MarketSummary extends BaseDatabaseType {
+  symbol: string
+  date: string // updateDate,
+  month: number
+  closePrice: number
   yearToDateReturn: number
 }

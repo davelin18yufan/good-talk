@@ -48,7 +48,6 @@ export function calculateProfitLoss(
 ) {
   let remainingSellQuantity = sellQuantity
   let totalBuyActualCost = 0
-  let totalQuantity = 0
 
   // 遍歷庫存並根據先進先出原則計算買入實際成本
   for (const stock of inventory) {
@@ -56,7 +55,6 @@ export function calculateProfitLoss(
 
     const quantityToUse = Math.min(stock.quantity, remainingSellQuantity)
     totalBuyActualCost += (stock.actualCost / stock.quantity) * quantityToUse
-    totalQuantity += quantityToUse
     remainingSellQuantity -= quantityToUse
   }
 
@@ -64,22 +62,11 @@ export function calculateProfitLoss(
     throw new Error("庫存不足以賣出指定數量")
   }
 
-  // 計算買入每股實際成本
-  const buyActualCostPerShare = totalBuyActualCost / totalQuantity
-
-  // 計算賣出每股實際收入
-  const sellActualCostPerShare = sellActualCost / sellQuantity
-
-  // 計算每股利潤
-  const profitPerShare = sellActualCostPerShare - buyActualCostPerShare
-
-  // 計算總獲利
-  const totalProfit = profitPerShare * sellQuantity
+  const totalProfit = sellActualCost - totalBuyActualCost
 
   return {
-    buyActualCostPerShare,
-    sellActualCostPerShare,
-    profitPerShare,
+    totalBuyActualCost,
+    sellActualCost,
     totalProfit,
   }
 }
